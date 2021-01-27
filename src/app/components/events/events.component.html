@@ -1,0 +1,55 @@
+<section class="events__container">
+    <div class="level">
+        <div class="level-left">
+            <div class="is-flex-col level-item" style="align-items: start;">
+                <h1 class="subtitle is-4">{{ title || "Events" }}</h1>
+                <p class="is-p"><small>Last updated {{lastUpdate |amTimeAgo }}</small></p>
+            </div>
+
+        </div>
+        <div class="level-right">
+            <input class="level-item input" type="text"
+                placeholder="Search Events... (e.g. 'start', 'stop', server name, timestamp)" [(ngModel)]="query"
+                (keyup)="updateFilteredData()" />
+        </div>
+    </div>
+    <div class="events">
+        <virtual-scroller #scroll [items]="filteredEvents" [enableUnequalChildrenSizes]="true"
+            (vsEnd)="handleScroll($event)">
+            <div *ngFor="let event of scroll.viewPortItems">
+                <h1 *ngIf="event.last && event.last.task != event.task"
+                    class="subtitle is-size-6 has-text-centered task-title">
+                    {{ event.timestamp | amCalendar }}
+                </h1>
+                <h1 *ngIf="!event.last" class="subtitle is-size-6 has-text-centered task-title">
+                    Latest
+                </h1>
+                <div class="grid" [class.is-new]="event.isNew">
+                    <div class="event-icon">
+                        <span class="icon" [class]="eventClass(event.event_type)">
+                            <fa-icon *ngIf="eventIcon(event.event_type)" [icon]="eventIcon(event.event_type)">
+                            </fa-icon>
+                        </span>
+                    </div>
+                    <div class="event-timestamp" :key="'ts-' + event.id">
+                        {{ event.timestamp | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
+                    </div>
+                    <div class="event-user" :key="'user-' + event.id">
+                        {{ event.user }}
+                    </div>
+                    <div class="event-message" :key="'message' + event.id">
+                        <pre>{{ event.message }}</pre>
+                    </div>
+                </div>
+            </div>
+            <h1 class="subtitle is-size-6 has-text-centered">
+                <ng-container *ngIf="loading; else doneLoading">
+                    <fa-icon icon="circle-notch" [spin]="true" class="icon"></fa-icon> Loading...
+                </ng-container>
+            </h1>
+            <ng-template #doneLoading>
+                <fa-icon icon="check" class="icon"></fa-icon> {{ filteredEvents.length > 0 ? 'No More Events' : 'No Events' }}
+            </ng-template>
+        </virtual-scroller>
+    </div>
+</section>

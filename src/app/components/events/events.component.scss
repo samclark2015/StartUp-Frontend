@@ -1,0 +1,129 @@
+$fade-delay: 5s;
+
+.grid {
+  display: grid;
+  grid-template-columns: 24px 21ch 13ch auto;
+  gap: 1rem;
+  padding: 0.75rem;
+}
+
+.group {
+  padding: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+pre {
+  padding: 0;
+  white-space: pre-wrap;
+  background-color: inherit;
+}
+
+.is-new {
+  -webkit-animation: fadein $fade-delay; /* Safari, Chrome and Opera > 12.1 */
+  -moz-animation: fadein $fade-delay; /* Firefox < 16 */
+  -ms-animation: fadein $fade-delay; /* Internet Explorer */
+  -o-animation: fadein $fade-delay; /* Opera < 12.1 */
+  animation: fadein $fade-delay;
+}
+
+@keyframes fadein {
+  from {
+    background-color: lightgray;
+  }
+  to {
+    opacity: inherit;
+  }
+}
+
+@media (max-width: 1200px) {
+  .level:not(:last-of-type) {
+    margin-bottom: 0;
+  }
+
+  .table tr {
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%;
+    align-items: flex-end;
+  }
+  .table td {
+    width: auto !important;
+    flex: 0;
+    font-weight: bold;
+    text-overflow: ellipsis;
+  }
+  .table td:nth-last-child(2),
+  .table td:first-child {
+    flex: 1;
+    display: flex;
+  }
+  .table td:first-child {
+    justify-content: flex-end;
+  }
+  .table td:nth-last-child(2) {
+    justify-content: flex-start;
+  }
+  .table td:last-child {
+    display: block;
+    flex: 0 0 100%;
+    font-weight: normal;
+    word-break: break-all;
+  }
+}
+
+.task-title {
+  margin-bottom: 0;
+  margin-top: 0.5rem;
+  overflow: hidden;
+}
+
+.task-title:before,
+.task-title:after {
+  content: "";
+  display: inline-block;
+  width: 50%;
+  margin: 0 0.5em 0 -55%;
+  vertical-align: middle;
+  border-bottom: 1px solid lightgray;
+  color: lightgray;
+}
+.task-title:after {
+  margin: 0 -55% 0 0.5em;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+}
+
+.events__container,
+.events {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.events__container {
+  padding: 1.25rem 1.5rem;
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.group {
+  flex: 1;
+}
+
+.events {
+  overflow: hidden;
+}
+
+virtual-scroller {
+  flex: 1;
+}
+
+@media (max-width: 1023px) {
+  .grid {
+    grid-template-columns: none;
+    grid-template-rows: auto auto auto auto;
+  }
+}

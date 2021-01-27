@@ -1,0 +1,63 @@
+.tree-view {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+virtual-scroller {
+  flex: 1;
+}
+
+.tree-view__search {
+  padding: 8px;
+  .control {
+    width: 100%;
+  }
+}
+
+.tree-view__header {
+  border-bottom: rgb(219, 219, 219) solid 1px;
+  line-height: 21px;
+  padding: 8px 12px;
+  margin-top: 1px;
+  margin-bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tree-view__header h3 {
+  font-weight: 700;
+}
+.tree-item__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-item__title {
+}
+
+.tree-item__subtitle {
+}
+
+.tree-item__root {
+  display: inline;
+  flex-direction: column;
+}
+
+.tree-item__content {
+  border-bottom: rgb(219, 219, 219) solid 1px;
+  cursor: pointer;
+  font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans",
+    "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 21px;
+  padding: 8px 12px;
+}
+
+.icon:hover {
+  background-color: rgb(219, 219, 219);
+  border-radius: 5px;
+}

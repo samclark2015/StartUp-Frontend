@@ -1,0 +1,74 @@
+[
+    {
+        "title": "Comment",
+        "field": "comment"
+    },
+    {
+        "title": "Mail",
+        "field": "mail"
+    },
+    {
+        "title": "Host",
+        "field": "host"
+    },
+    {
+        "title": "Start Command",
+        "field": "start_line"
+    },
+    {
+        "title": "Arguments",
+        "field": "args"
+    },
+    {
+        "title": "Stop Command",
+        "field": "stop_line"
+    },
+    {
+        "title": "Check Command",
+        "field": "check_line"
+    },
+    {
+        "title": "Running Command",
+        "field": "running"
+    },
+    {
+        "title": "Working Command",
+        "field": "working_line"
+    },
+    {
+        "title": "Timeout (seconds)",
+        "field": "timeout"
+    },
+    {
+        "title": "Copies",
+        "field": "copies"
+    },
+    {
+        "title": "Autostart",
+        "field": "autostart"
+    },
+    {
+        "title": "Requires",
+        "field": "requires"
+    },
+    {
+        "title": "Run as User",
+        "field": "run_as_user"
+    },
+    {
+        "title": "Traceback",
+        "field": "traceback"
+    },
+    {
+        "title": "OS to Use",
+        "field": "os_to_use"
+    },
+    {
+        "title": "Alarm Text",
+        "field": "alarm_text"
+    },
+    {
+        "title": "Watch",
+        "field": "watch"
+    }
+]

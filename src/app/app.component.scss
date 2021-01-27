@@ -1,0 +1,33 @@
+.header {
+  padding: 15px 12px;
+  margin: 0;
+  border-bottom-style: solid;
+  border-width: 1px;
+  border-color: lightgray;
+}
+
+.level {
+  display: flex;
+  align-items: flex-start;
+}
+
+.level-right {
+  margin-top: 0;
+}
+
+.level-item.is-flex-col {
+  align-items: flex-start;
+
+  *:not(:last-child) {
+    margin-bottom: 1rem;
+  }
+}
+
+.notification__container {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+}
+
+.notification {
+}

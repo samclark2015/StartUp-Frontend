@@ -1,0 +1,12 @@
+<app-master-detail  [showDetail]="selectedId">
+    <app-tree-view master [items]="items" (select)="handleSelection($event)">
+    </app-tree-view>
+    <div detail class="is-flex-col" style="height: 100%;">
+        <h1 *ngIf="error">Error: {{error}}</h1>
+        <div style="flex: 1;" class="is-flex-col">
+            <virtual-scroller #scroll [items]="logContent" style="flex: 1;">
+                <pre *ngFor="let line of scroll.viewPortItems">{{line}}</pre>
+            </virtual-scroller>
+        </div>
+    </div>
+</app-master-detail>

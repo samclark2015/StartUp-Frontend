@@ -1,0 +1,136 @@
+<div id="wrapper">
+  <!-- <Modal class="has-text-centered" v-if="$store.state.offline">
+    <h1 class="title has-text-white">Server Offline</h1>
+    <h2 class="subtitle has-text-white">Attempting to Reconnect</h2>
+    <div>
+      <Indicator size="40"></Indicator>
+      <input class="input is-inline" type="text" v-model.lazy.trim="host" />
+    </div>
+  </Modal> -->
+  <nav class="level header">
+    <!-- Left side -->
+    <div class="level-left">
+      <div class="level-item">
+        <a>
+          <span class="title">StartUp</span>
+        </a>
+      </div>
+      <div class="level-item tabs">
+        <ul>
+          <li routerLinkActive="is-active">
+            <a routerLink="servers">Servers</a>
+          </li>
+          <li routerLinkActive="is-active">
+            <a routerLink="logs">Log Files</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="level-right">
+      <div class="buttons has-addons">
+        <button class="button" *ngIf="isAuthenticated()" (click)="logout()" [disabled]="isScreenlocked()">
+          <ng-container *ngIf="!isScreenlocked(); else screenlock">
+            <fa-icon icon="sign-out-alt" class="icon"></fa-icon>
+            <p>Logout {{username()}}</p>
+          </ng-container>
+          <ng-template #screenlock>
+            <fa-icon icon="user" class="icon"></fa-icon>
+            <p>{{username()}} <small>(ScreenLock)</small></p>
+          </ng-template>
+        </button>
+        <button class="button" *ngIf="!isAuthenticated()" (click)="login()">
+          <fa-icon icon="sign-in-alt" class="icon"></fa-icon>
+          <p>Login</p>
+        </button>
+        <a title="Documentation" class="button" href="https://gitlab.pbn.bnl.gov/StartUp/frontend/-/wikis/home"
+          target="_blank">
+          <span class="icon">
+            <fa-icon icon="life-ring"></fa-icon>
+          </span>
+        </a>
+        <a class="button" target="_blank" title="Editor" [href]="'editor/' | backendUrl">
+          <span class="icon">
+            <fa-icon icon="edit"></fa-icon>
+          </span>
+        </a>
+      </div>
+      <!-- <button-group class="level-item" :right-align="true">
+        <template v-slot:primary>
+          <p class="control">
+            <a class="button" v-if="authenticated" :href="logoutLink + '?next=' + currentPath">
+              <span class="icon">
+                <fa-icon icon="sign-out-alt"></fa-icon>
+              </span>
+              <span>Logout {{ $store.state.authorization.username }}</span>
+            </a>
+            <button class="button" v-else-if="screenlockAuthenticated" disabled>
+              {{ $store.state.authorization.screenlockUser }} (ScreenLock)
+            </button>
+            <a class="button" :href="loginLink + '?next=' + currentPath" v-else>
+              <span class="icon">
+                <fa-icon icon="sign-in-alt"></fa-icon>
+              </span>
+              <span>Login</span>
+            </a>
+          </p>
+          <p class="control">
+            <a title="Documentation" class="button" href="https://gitlab.pbn.bnl.gov/StartUp/frontend/-/wikis/home"
+              target="_blank">
+              <span class="icon">
+                <fa-icon icon="life-ring"></fa-icon>
+              </span>
+            </a>
+          </p>
+        </template>
+        <template v-slot:secondary>
+          <a class="dropdown-item" :to="{ name: 'all-events' }">
+            <span class="icon">
+              <fa-icon icon="book"></fa-icon>
+            </span>
+            <span>All Events</span>
+          </a>
+          <a class="dropdown-item" :href="editorLink" target="_blank">
+            <span class="icon">
+              <fa-icon icon="edit"></fa-icon>
+            </span>
+            <span>Editor</span>
+          </a>
+          <a class="dropdown-item" :to="{ name: 'settings' }">
+            <span class="icon">
+              <fa-icon icon="sliders-h"></fa-icon>
+            </span>
+            <span>Settings</span>
+          </a>
+        </template>
+      </button-group> -->
+    </div>
+  </nav>
+  <div id="content">
+    <router-outlet></router-outlet>
+  </div>
+  <div class="level" style="background: whitesmoke">
+    <div class="level-left">
+      <span class="level-item">
+        <span class="icon is-medium">
+          <fa-icon icon="server"></fa-icon>
+        </span>
+        <p>{{ host }}</p>
+      </span>
+    </div>
+    <div class="level-right"></div>
+  </div>
+</div>
+
+<div class="notification__container">
+  <div *ngFor="let notif of notifications" class="notification {{notif.class || 'is-info'}}">
+    <button class="delete" (click)="closeNotification(notif)"></button>
+    <h1 class="subtitle is-5">{{notif.title}}</h1>
+    <p *ngIf="notif.body">{{notif.body}}</p>
+
+    <div class="buttons has-addons" *ngIf="notif.actions" style="margin-top: 0.5rem;">
+      <button class="button" (click)="handleNotificationAction(notif, action)" *ngFor="let action of notif.actions">
+        <span>{{action.title}}</span>
+      </button>
+    </div>
+  </div>
+</div>

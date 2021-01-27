@@ -1,0 +1,100 @@
+/* You can add global styles to this file, and also import other style files */
+.toasted-container.bottom-right {
+    bottom: 10px !important;
+    right: 10px !important;
+}
+
+.toasted.error .action {
+    color: whitesmoke !important;
+}
+
+#wrapper {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    height: 100Vh;
+    min-height: 100Vh;
+    max-height: 100Vh;
+}
+
+#content {
+    display: flex;
+    overflow: auto;
+    flex-grow: 1;
+}
+
+#content>.is-flex {
+    flex-grow: 1;
+    margin: 0;
+
+}
+
+.scrollable {
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+.selectable {
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.selected {
+    background-color: lightgray;
+}
+
+
+.flex-centered {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: white;
+}
+
+tr.sticky {
+    background-color: white;
+}
+
+
+.is-flex-col {
+    display: flex;
+    flex-direction: column;
+    /* height: 100%; */
+}
+
+.flex-align-start {
+    align-items: flex-start;
+}
+
+
+.level-right.is-flex-col .level-item:not(:last-child) {
+    margin-right: 0;
+}
+
+.level-right.is-flex-col {
+    align-items: flex-end;
+}
+
+.checkbox.level-item {
+    column-gap: 4px;
+}
+
+.is-flex > .is-fullwidth {
+    flex: 1;
+}
+
+// .cdk-virtual-scroll-content-wrapper {
+//     max-width: 100%;
+// }

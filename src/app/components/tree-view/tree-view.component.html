@@ -1,0 +1,54 @@
+<div class="tree-view">
+    <div class="tree-view__header level is-mobile" [class.sticky]="!hasSearchListener" *ngIf="title">
+        <h3 class="level-item is-inline">{{title}}</h3>
+        <div class="level-left">
+            <ng-content select="[decoration]"></ng-content>
+        </div>
+    </div>
+    <div class="sticky tree-view__search tree-view__header field" *ngIf="hasSearchListener">
+        <p class="control has-icons-left">
+            <input type="text" class="input" placeholder="Search..." (keyup)="handleSearch($event)" />
+            <span class="icon is-small is-left">
+                <fa-icon icon="search"></fa-icon>
+            </span>
+        </p>
+    </div>
+    <!-- <cdk-virtual-scroll-viewport [itemSize]="59"> -->
+    <virtual-scroller #scroll [items]="items">
+        <ng-template *ngFor="let item of scroll.viewPortItems; trackBy: tracker" [ngTemplateOutlet]="treeItemRef"
+            [ngTemplateOutletContext]="{ item: item, depth: 0 }">
+        </ng-template>
+    </virtual-scroller>
+
+    <!-- </cdk-virtual-scroll-viewport> -->
+
+</div>
+
+<ng-template #treeItemRef let-item="item" let-depth="depth">
+    <ul class="tree-view__items">
+        <li class="tree-item">
+            <div class="tree-item__content" [class.selected]="item.selected" [style.paddingLeft.px]="5+28*depth"
+                (click)="handleClick(item)">
+                <div class="tree-item__root selectable">
+                    <h3 class="tree-item__label tree-item__title" [title]="item.title">
+                        <span class="selectable icon" *ngIf="item.children && item.children.length > 0"
+                            (click)="handleCollapse($event, item)">
+                            <fa-icon [icon]="isCollapsed(item) ? 'caret-right' : 'caret-down'"></fa-icon>
+                        </span>
+                        {{item.title}}
+                    </h3>
+                    <h4 class="tree-item__label tree-item__subtitle has-text-grey" *ngIf="item.subtitle">
+                        {{item.subtitle}}
+                    </h4>
+                </div>
+            </div>
+            <div *ngIf="!isCollapsed(item)">
+                <ng-template *ngFor="let child of item.children" [ngTemplateOutlet]="treeItemRef"
+                    [ngTemplateOutletContext]="{ item: child, depth: depth + 1 }">
+                </ng-template>
+
+            </div>
+        </li>
+    </ul>
+
+</ng-template>

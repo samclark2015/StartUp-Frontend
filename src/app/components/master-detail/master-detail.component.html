@@ -1,0 +1,10 @@
+<div class="parent is-flex" [class.detail-only]="showDetail">
+  <!-- <section class="master scrollable" :class="{active: !showDetail}" :style="{width: masterWidth}"> -->
+  <!-- <section class="pane master scrollable" [class.active]="!showDetail"> -->
+  <ng-content select="[master]"></ng-content>
+  <!-- </section> -->
+  <!-- <section class="detail scrollable" :class="{active: showDetail}"> -->
+  <section class="pane detail scrollable">
+    <ng-content select="[detail]"></ng-content>
+  </section>
+</div>
