@@ -25,7 +25,7 @@ export class TreeViewComponent extends SubscriptionDelegate implements OnInit {
 
 
   @Output() public search = new EventEmitter<string>();
-  @Output() public select = new EventEmitter<string>();
+  @Output() public selectItem = new EventEmitter<string>();
 
   @ViewChild("scroll") private scrollElement?: VirtualScrollerComponent;
 
@@ -49,7 +49,7 @@ export class TreeViewComponent extends SubscriptionDelegate implements OnInit {
 
   handleClick(item: TreeItem) {
     if (item.value != null) {
-      this.select.emit(item.value);
+      this.selectItem.emit(item.value);
     }
   }
 

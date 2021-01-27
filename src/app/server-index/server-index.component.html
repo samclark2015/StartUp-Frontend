@@ -1,12 +1,12 @@
 <app-master-detail [showDetail]="selectedServerId != null" #masterDetail>
     <div master [class.is-active]="masterDetail.showCategories">
         <app-tree-view [items]="categoryTree" title="Categories"
-            (select)="masterDetail.showCategories = false; handleCategorySelect($event)">
+            (selectItem)="masterDetail.showCategories = false; handleCategorySelect($event)">
         </app-tree-view>
     </div>
     <div master [class.is-active]="!masterDetail.showCategories">
         <app-tree-view #serverTreeComponent [items]="serverTree" title="Servers" (search)="handleSearch($event)"
-            (select)="handleSelect($event)">
+            (selectItem)="handleSelect($event)">
             <button decoration class="level-item button is-small category-button"
                 (click)="masterDetail.showCategories = !masterDetail.showCategories">Categories</button>
         </app-tree-view>

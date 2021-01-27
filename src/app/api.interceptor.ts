@@ -14,6 +14,7 @@ import { catchError, tap } from 'rxjs/operators';
 import { NotificationService } from './notification.service';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
+import Cookies from "js-cookie";
 
 @Injectable()
 export class ApiInterceptor implements HttpInterceptor {
@@ -30,15 +31,22 @@ export class ApiInterceptor implements HttpInterceptor {
 
     if (environment.useTokenAuth && this.auth.isAuthenticated()) {
       let token = this.auth.getToken();
-      let headers = request.headers.set("Authorization", `Token ${token}`)
+      var headers = request.headers.set("Authorization", `Token ${token}`);
       request = request.clone({ headers });
     }
+
+    let xsrf = Cookies.get('csrftoken');
+    if (xsrf) {
+      var headers = request.headers.set("X-CSRFToken", xsrf);
+      request = request.clone({ headers });
+    }
+
 
     return next.handle(request).pipe(tap(evt => {
       if (evt instanceof HttpResponse) {
         let user = evt.headers.get("cad-user");
         let screenlockUser = evt.headers.get("cad-screenlock-user");
-        
+
         this.auth.setUsername(user || screenlockUser || undefined);
         this.auth.setScreenlock(user == null && screenlockUser != null);
         this.auth.setExternalAuth(user != null || screenlockUser != null);
@@ -51,7 +59,7 @@ export class ApiInterceptor implements HttpInterceptor {
           this.notif.notify({
             title: "Authentication Required", class: "is-warning", actions: [{
               title: "Login",
-              callback: () => this.router.navigate(["login", {next: location.pathname}])
+              callback: () => this.router.navigate(["login", { next: location.pathname }])
             }]
           });
         }

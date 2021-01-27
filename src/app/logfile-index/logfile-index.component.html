@@ -1,5 +1,5 @@
 <app-master-detail  [showDetail]="selectedId">
-    <app-tree-view master [items]="items" (select)="handleSelection($event)">
+    <app-tree-view master [items]="items" (selectItem)="handleSelection($event)">
     </app-tree-view>
     <div detail class="is-flex-col" style="height: 100%;">
         <h1 *ngIf="error">Error: {{error}}</h1>
