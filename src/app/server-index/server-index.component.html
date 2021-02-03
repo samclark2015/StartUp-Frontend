@@ -36,7 +36,7 @@
                         </ng-container>
 
                         <div class="control">
-                            <div class="dropdown" #dropdown [class.is-active]="dropdown.isActive">
+                            <div class="dropdown is-active" #dropdown>
                                 <div class="dropdown-trigger" (click)="dropdown.isActive = !dropdown.isActive"
                                     title="Extra Actions">
                                     <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
@@ -44,7 +44,7 @@
                                         </fa-icon>
                                     </button>
                                 </div>
-                                <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                                <div class="dropdown-menu" id="dropdown-menu" role="menu" @openClose *ngIf="dropdown.isActive">
                                     <div class="dropdown-content">
                                         <ng-container *ngFor="let action of selectedServer.actions">
                                             <a class="link dropdown-item" *ngIf="!action.primary"

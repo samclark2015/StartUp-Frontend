@@ -5,13 +5,29 @@ import { ApiService, DashboardView } from '../api.service';
 import { SubscriptionDelegate } from '../subscription-delegate';
 import details from './details.json';
 import { Subscription } from 'rxjs';
-import { environment } from 'src/environments/environment';
 import { AuthService } from '../auth.service';
+import {
+  trigger,
+  style,
+  animate,
+  transition,
+} from '@angular/animations';
 
 @Component({
   selector: 'app-server-index',
   templateUrl: './server-index.component.html',
-  styleUrls: ['./server-index.component.scss']
+  styleUrls: ['./server-index.component.scss'],
+  animations: [
+    trigger('openClose', [
+      transition(':enter', [
+        style({ opacity: 0 }),
+        animate('100ms ease-in', style({ opacity: 1 }))
+      ]),
+      transition(':leave', [
+        animate('100ms ease-in', style({ opacity: 0 }))
+      ]),
+    ]),
+  ],
 })
 export class ServerIndexComponent extends SubscriptionDelegate implements OnInit {
 
@@ -52,7 +68,7 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
       this.api.fetchServer(id).subscribe((server) => {
         this.selectedServer = server;
       });
-      this.addSub(this.api.subscribeWS("servers." + id).subscribe(data => {
+      this.socket = this.api.subscribeWS("servers." + id).subscribe(data => {
         switch (data.type) {
           case "job.complete":
             this.actionPending = false;
@@ -60,7 +76,7 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
           default:
             break
         }
-      }))
+      });
     } else {
       this.fetchDashboard();
     }
@@ -77,6 +93,11 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
         this.selectedServerId = undefined;
       }
     }));
+  }
+
+  ngOnDestroy(): void {
+    super.ngOnDestroy();
+    this.socket?.unsubscribe();
   }
 
   private fetchDashboard() {

@@ -1,11 +1,16 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
 import { groupBy } from 'lodash-es';
-import { Datasource } from 'ngx-ui-scroll';
 import { Subscription } from 'rxjs';
-import { filter, map, tap } from 'rxjs/operators';
 import { ApiService } from 'src/app/api.service';
 import { SubscriptionDelegate } from 'src/app/subscription-delegate';
+import {
+  trigger,
+  state,
+  style,
+  animate,
+  transition,
+} from '@angular/animations';
 
 export interface Event {
   type: number
@@ -26,6 +31,19 @@ function pairwise(arr: any[], func: (i0: number, a0: any, i1: number, a1: any) =
   selector: 'app-events',
   templateUrl: './events.component.html',
   styleUrls: ['./events.component.scss'],
+  animations: [
+    trigger('newItem', [
+      state("true", style({
+        background: "lightgrey"
+      })),
+      state("false", style({
+        background: "*"
+      })),
+      transition('1=>0', [
+        animate('2.5s')
+      ]),
+    ]),
+  ],
 })
 export class EventsComponent extends SubscriptionDelegate implements OnInit, OnChanges, AfterViewInit {
 
@@ -39,6 +57,7 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
   query = "";
   lastUpdate?: Date;
   filteredEvents: Event[] = [];
+  groupedEvents: Event[][] = [];
   loading = false;
 
   private moreUrl?: string;
@@ -66,10 +85,12 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
         : this.events.filter((event) =>
           event.message.toLowerCase().includes(this.query.toLowerCase())
         );
-    pairwise(results, (i1, o1, i2, o2) => {
-      o2.last = o1;
-    });
+    // pairwise(results, (i1, o1, i2, o2) => {
+    //   o2.last = o1;
+    // });
+    let groups = groupBy(results, 'task');
     this.filteredEvents = results;
+    this.groupedEvents = Object.values(groups);
   }
 
   ngOnInit(): void {

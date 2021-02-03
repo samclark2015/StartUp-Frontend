@@ -14,6 +14,8 @@ import { ComponentsModule } from './components/components.module';
 import { LogfileIndexComponent } from './logfile-index/logfile-index.component';
 import { VirtualScrollerModule } from 'ngx-virtual-scroller';
 import { BackendUrlPipe } from './backend-url.pipe';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 
 @NgModule({
   declarations: [
@@ -30,7 +32,8 @@ import { BackendUrlPipe } from './backend-url.pipe';
     HttpClientModule,
     ReactiveFormsModule,
     ComponentsModule,
-    VirtualScrollerModule
+    VirtualScrollerModule,
+    BrowserAnimationsModule
   ],
   providers: [{
     provide: HTTP_INTERCEPTORS,

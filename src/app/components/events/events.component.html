@@ -14,17 +14,19 @@
         </div>
     </div>
     <div class="events">
-        <virtual-scroller #scroll [items]="filteredEvents" [enableUnequalChildrenSizes]="true"
+        <virtual-scroller #scroll [items]="groupedEvents" [enableUnequalChildrenSizes]="true"
             (vsEnd)="handleScroll($event)">
-            <div *ngFor="let event of scroll.viewPortItems">
-                <h1 *ngIf="event.last && event.last.task != event.task"
-                    class="subtitle is-size-6 has-text-centered task-title">
-                    {{ event.timestamp | amCalendar }}
-                </h1>
-                <h1 *ngIf="!event.last" class="subtitle is-size-6 has-text-centered task-title">
+            <div *ngFor="let group of scroll.viewPortItems; let first = first">
+                <h1 *ngIf="first; else groupHeader" class="subtitle is-size-6 has-text-centered task-title">
                     Latest
                 </h1>
-                <div class="grid" [class.is-new]="event.isNew">
+                <ng-template #groupHeader>
+                    <h1 class="subtitle is-size-6 has-text-centered task-title">
+                        {{ group[0].timestamp | amCalendar }}
+                    </h1>
+                </ng-template>
+
+                <div *ngFor="let event of group.reverse()" class="grid" [@newItem]="event.isNew" (@newItem.done)="event.isNew = false">
                     <div class="event-icon">
                         <span class="icon" [class]="eventClass(event.event_type)">
                             <fa-icon *ngIf="eventIcon(event.event_type)" [icon]="eventIcon(event.event_type)">
@@ -48,7 +50,8 @@
                 </ng-container>
             </h1>
             <ng-template #doneLoading>
-                <fa-icon icon="check" class="icon"></fa-icon> {{ filteredEvents.length > 0 ? 'No More Events' : 'No Events' }}
+                <fa-icon icon="check" class="icon"></fa-icon> {{ filteredEvents.length > 0 ? 'No More Events' : 'No
+                Events' }}
             </ng-template>
         </virtual-scroller>
     </div>

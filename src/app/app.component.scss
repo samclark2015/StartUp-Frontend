@@ -6,22 +6,22 @@
   border-color: lightgray;
 }
 
-.level {
-  display: flex;
-  align-items: flex-start;
-}
+// .level {
+//   display: flex;
+//   align-items: flex-start;
+// }
 
-.level-right {
-  margin-top: 0;
-}
+// .level-right {
+//   margin-top: 0;
+// }
 
-.level-item.is-flex-col {
-  align-items: flex-start;
+// .level-item.is-flex-col {
+//   align-items: flex-start;
 
-  *:not(:last-child) {
-    margin-bottom: 1rem;
-  }
-}
+//   *:not(:last-child) {
+//     margin-bottom: 1rem;
+//   }
+// }
 
 .notification__container {
   position: absolute;
