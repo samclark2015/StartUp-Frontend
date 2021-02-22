@@ -4,7 +4,7 @@ import { TreeItem, TreeViewComponent } from 'src/app/components/tree-view/tree-v
 import { ApiService, DashboardView } from '../api.service';
 import { SubscriptionDelegate } from '../subscription-delegate';
 import details from './details.json';
-import { Subscription } from 'rxjs';
+import { merge, Subscription } from 'rxjs';
 import { AuthService } from '../auth.service';
 import {
   trigger,
@@ -67,16 +67,23 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
       // this.serverTreeComponent?.scrollToItemWithValue(id);
       this.api.fetchServer(id).subscribe((server) => {
         this.selectedServer = server;
+        this.socket = merge(
+          this.api.subscribeWS("servers." + id),
+          this.api.subscribeWS("sysmon." + server.name),
+        ).subscribe(message => {
+          switch (message.type) {
+            case "job.complete":
+              this.actionPending = false;
+              break;
+            case "sysmon.update":
+              this.selectedServer.sysmon_status = message.data;
+              break;
+            default:
+              break
+          }
+        });
       });
-      this.socket = this.api.subscribeWS("servers." + id).subscribe(data => {
-        switch (data.type) {
-          case "job.complete":
-            this.actionPending = false;
-            break;
-          default:
-            break
-        }
-      });
+
     } else {
       this.fetchDashboard();
     }
