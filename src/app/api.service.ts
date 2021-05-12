@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { ConfigService } from './config.service';
 
+const CHANNEL_RE = /[^a-zA-Z0-9\-\.]/g;
+
 export interface DashboardItem {
   "name": string;
   "console_file_path": string;
@@ -63,6 +65,7 @@ export class ApiService {
   }
 
   subscribeWS(channel: string) {
+    channel = channel.replace(CHANNEL_RE, "-");
     const obs = this.wsSubject.multiplex(
       () => ({
         type: "subscribe",

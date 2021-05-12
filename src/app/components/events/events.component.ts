@@ -85,12 +85,10 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
         : this.events.filter((event) =>
           event.message.toLowerCase().includes(this.query.toLowerCase())
         );
-    // pairwise(results, (i1, o1, i2, o2) => {
-    //   o2.last = o1;
-    // });
+
     let groups = groupBy(results, 'task');
     this.filteredEvents = results;
-    this.groupedEvents = Object.values(groups);
+    this.groupedEvents = Object.values(groups).map(events => events.reverse());
   }
 
   ngOnInit(): void {
@@ -153,6 +151,7 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
   private subscribeWS() {
     if (this.socket) {
       this.socket.unsubscribe();
+      this.socket = undefined;
     }
     if (!this.params.obj) {
       return;
@@ -170,6 +169,7 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
           break;
       }
     });
+    this.addSub(this.socket);
   }
 
   async handleScroll(event: any) {

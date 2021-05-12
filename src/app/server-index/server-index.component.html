@@ -97,7 +97,7 @@
                         </span>
                         Last Alarm Sent {{ st.LastAlarmSent }}
                     </p>
-                    <p>
+                    <p *ngIf="st.LastStartAttempt != 'UNKNOWN'">
                         <span class="icon">
                             <fa-icon icon="play-circle"></fa-icon>
                         </span>

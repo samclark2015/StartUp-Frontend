@@ -26,7 +26,7 @@
                     </h1>
                 </ng-template>
 
-                <div *ngFor="let event of group.reverse()" class="grid" [@newItem]="event.isNew" (@newItem.done)="event.isNew = false">
+                <div *ngFor="let event of group" class="grid" [@newItem]="event.isNew" (@newItem.done)="event.isNew = false">
                     <div class="event-icon">
                         <span class="icon" [class]="eventClass(event.event_type)">
                             <fa-icon *ngIf="eventIcon(event.event_type)" [icon]="eventIcon(event.event_type)">

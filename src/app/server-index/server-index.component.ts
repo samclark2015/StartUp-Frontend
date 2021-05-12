@@ -61,12 +61,14 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
   set selectedServerId(id: number | undefined) {
     this._selectedServerId = id;
     this.selectedServer = undefined;
+    this.actionPending = false;
     this.rebuildServerTree();
     this.socket?.unsubscribe();
     if (id) {
       // this.serverTreeComponent?.scrollToItemWithValue(id);
       this.api.fetchServer(id).subscribe((server) => {
         this.selectedServer = server;
+        this.actionPending = server.current_job != null;
         this.socket = merge(
           this.api.subscribeWS("servers." + id),
           this.api.subscribeWS("sysmon." + server.name),
