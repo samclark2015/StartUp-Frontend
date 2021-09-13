@@ -1,10 +1,10 @@
-import { Component, ComponentRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { VirtualScrollerComponent } from 'ngx-virtual-scroller';
 import { ApiService } from '../api.service';
 import { TreeItem } from '../components/tree-view/tree-view.component';
 import { SubscriptionDelegate } from '../subscription-delegate';
+
 
 @Component({
   selector: 'app-logfile-index',
@@ -17,15 +17,15 @@ export class LogfileIndexComponent extends SubscriptionDelegate implements OnIni
   items: TreeItem[] = [];
   logContent: string[] = [];
   error?: string;
+  loading: boolean = false;
 
-  private _query: string = "";
   private logFiles: any[] = [];
   private decoder = new TextDecoder("utf-8");
   private logBuffer = "";
   private abortController?: AbortController;
-  private currIdx = -1;
 
-  constructor(private api: ApiService, private router: Router, private route: ActivatedRoute, private sanitizer: DomSanitizer) {
+
+  constructor(private api: ApiService, private router: Router, private route: ActivatedRoute) {
     super();
   }
 
@@ -83,6 +83,7 @@ export class LogfileIndexComponent extends SubscriptionDelegate implements OnIni
 
   async loadContents(link: string) {
     this.abortController?.abort();
+    this.loading = true;
 
     this.abortController = new AbortController();
     this.logContent = [];
@@ -90,6 +91,7 @@ export class LogfileIndexComponent extends SubscriptionDelegate implements OnIni
     let resp = await fetch(link, { signal: this.abortController.signal });
     if (!resp.ok)
       throw resp.statusText
+
     let reader = resp.body?.getReader();
     if (reader)
       this.loadNextChunk(reader);
@@ -107,35 +109,15 @@ export class LogfileIndexComponent extends SubscriptionDelegate implements OnIni
           this.logContent = this.logContent.concat(lines.split("\n"));
         }
         this.loadNextChunk(reader);
+      } else {
+        this.loading = false;
       }
     })
   }
 
-  set query(q: string) {
-    let reset = q != this._query;
-    this._query = q;
-    this.search(q, reset);
-  }
-
-  get query() {
-    return this._query;
-  }
-
-  search(query: string, reset: boolean) {
-    let re = new RegExp("(" + query + ")", 'gi')
-    this.currIdx = reset ? 0 : this.currIdx;
-    const index = this.logContent.slice(this.currIdx + 1).findIndex(v => re.test(v));
-    console.log(index);
-    this.currIdx = index === -1 ? 0 : (this.currIdx + index + 1);
-    if (this.currIdx >= 0 && query != "") {
-      this.scroll?.scrollToIndex(this.currIdx);
-    }
-  }
-
-  highlight(text: string, q: string) {
-    let replacement = q !== "" ? "<span style='background-color: yellow'>$1</span>" : "$1";
-    let re = new RegExp("(" + q + ")", 'gi')
-    return this.sanitizer.bypassSecurityTrustHtml(text.replace(re, replacement));
+  handleSearch(idx?: number) {
+    if(idx != null) 
+      this.scroll?.scrollToIndex(idx);
   }
 
 

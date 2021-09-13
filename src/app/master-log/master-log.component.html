@@ -1,0 +1,30 @@
+<div class="main-wrapper">
+    <div class="is-flex">
+        <app-search #search style="margin: 1rem; flex: 1;" [content]="messages" (searchResult)="handleSearch($event)">
+        </app-search>
+    </div>
+    <virtual-scroller #scroll [items]="logEntries" [enableUnequalChildrenSizes]="true" *ngIf="logEntries.length > 0">
+        <table class="table is-fullwidth is-hoverable">
+            <thead #header>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Message</th>
+            </thead>
+            <tbody #container>
+                <tr *ngFor="let entry of scroll.viewPortItems">
+                    <td style="width: 20ch;">{{entry.timestamp | date :'MM/dd/yyyy, HH:mm:ss'}}</td>
+                    <td [ngStyle]="{width: maxUserWidth+'ch'}">{{entry.user || ""}}</td>
+                    <td>
+                        <pre [innerHtml]="entry.message | highlight: search.query"></pre>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </virtual-scroller>
+    <div *ngIf="logEntries.length == 0">
+        <h1 class="title has-text-centered">
+            <!-- <fa-icon class="icon" icon="spinner" [spin]="true"></fa-icon> Loading... -->
+            Loading...
+        </h1>
+    </div>
+</div>

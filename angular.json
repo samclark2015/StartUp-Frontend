@@ -47,7 +47,8 @@
               "src/styles.scss",
               "../node_modules/bulma/bulma.sass"
             ],
-            "scripts": []
+            "scripts": [
+            ]
           },
           "configurations": {
             "production": {

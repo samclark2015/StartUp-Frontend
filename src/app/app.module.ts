@@ -15,7 +15,11 @@ import { LogfileIndexComponent } from './logfile-index/logfile-index.component';
 import { VirtualScrollerModule } from 'ngx-virtual-scroller';
 import { BackendUrlPipe } from './backend-url.pipe';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MasterLogComponent } from './master-log/master-log.component';
 
+import { DatetimerangepickerModule } from "angular-datetimerangepicker";
+import { HighlightPipe } from './highlight.pipe';
+import { SearchComponent } from './components/search/search.component';
 
 @NgModule({
   declarations: [
@@ -23,7 +27,10 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     ServerIndexComponent,
     LoginComponent,
     LogfileIndexComponent,
-    BackendUrlPipe
+    BackendUrlPipe,
+    MasterLogComponent,
+    HighlightPipe,
+    SearchComponent
   ],
   imports: [
     BrowserModule,
@@ -34,7 +41,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     ComponentsModule,
     VirtualScrollerModule,
     BrowserAnimationsModule,
-    FormsModule
+    FormsModule,
+    DatetimerangepickerModule
   ],
   providers: [{
     provide: HTTP_INTERCEPTORS,
@@ -43,7 +51,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
   }],
   bootstrap: [AppComponent]
 })
-export class AppModule { 
+export class AppModule {
   constructor(library: FaIconLibrary) {
     library.addIconPacks(fas);
   }

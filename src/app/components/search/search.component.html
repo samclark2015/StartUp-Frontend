@@ -1,0 +1,22 @@
+<div class="field has-addons">
+    <p class="control" style="width: 100%">
+        <input type="text" class="input" placeholder="Search..." [(ngModel)]="query"
+            (keyup.enter)="search(query, false)" (keyup.shift.enter)="search(query, false, true)" />
+    </p>
+    <ng-container *ngIf="query != ''">
+        <p class="control">
+            <a class="button is-static">
+                {{currIdx + 1}}/{{matches.length}}
+            </a>
+        <p class="control">
+            <a class="button" (click)="search(query, false, true)">
+                <fa-icon class="icon" icon="arrow-up"></fa-icon>
+            </a>
+        </p>
+        <p class="control">
+            <a class="button" (click)="search(query, false)">
+                <fa-icon class="icon" icon="arrow-down"></fa-icon>
+            </a>
+        </p>
+    </ng-container>
+</div>

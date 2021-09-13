@@ -43,6 +43,7 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
   categoryTree: TreeItem[] = [];
   selectedServer?: any;
   selectedCategory?: any;
+  details: any[] = [];
 
   detailCollapse = true;
   eventCollapse = false;
@@ -68,6 +69,12 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
       // this.serverTreeComponent?.scrollToItemWithValue(id);
       this.api.fetchServer(id).subscribe((server) => {
         this.selectedServer = server;
+        this.details = details.filter(detail => this.selectedServer[detail.field]).map(detail => {
+          return {
+            title: detail.title,
+            value: this.selectedServer[detail.field]
+          }
+        });
         this.actionPending = server.current_job != null;
         this.socket = merge(
           this.api.subscribeWS("servers." + id),
@@ -194,15 +201,6 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
     return name == "No Longer Watched"
       ? name
       : `Monitored by ${name}`
-  }
-
-  get details() {
-    return details.filter(detail => this.selectedServer[detail.field]).map(detail => {
-      return {
-        title: detail.title,
-        value: this.selectedServer[detail.field]
-      }
-    });
   }
 
   get jsonData() {

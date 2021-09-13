@@ -1,18 +1,28 @@
 <app-master-detail [showDetail]="selectedId">
     <app-tree-view master [items]="items" (selectItem)="handleSelection($event)">
     </app-tree-view>
-    <div detail class="is-flex-col" style="height: 100%;">
-        <h1 *ngIf="error; else elseBlock">Error: {{error}}</h1>
-        <ng-template #elseBlock>
-            <div style="flex: 1;" class="is-flex-col">
-                <div style="margin: 1rem;">
-                    <input type="text" class="input" placeholder="Search..." [(ngModel)]="query"
-                        (keyup.enter)="search(query, false)" />
+    <div detail class="is-flex-col" style="height: 100%; justify-content: center;">
+        <ng-container *ngIf="error; then errorBlock else contentBlock"></ng-container>
+        <ng-template #errorBlock>
+            <h1 class="title has-text-centered">{{error}}</h1>
+        </ng-template>
+        <ng-template #contentBlock>
+            <ng-container *ngIf="logContent.length > 0; else emptyBlock">
+                <div style="flex: 1;" class="is-flex-col">
+                    <app-search #search [content]="logContent" style="margin: 1rem;"
+                        (searchResult)="handleSearch($event)"></app-search>
+                    <virtual-scroller #scroll [items]="logContent" style="flex: 1;">
+                        <pre *ngFor="let line of scroll.viewPortItems"
+                            [innerHtml]="line | highlight: search.query"></pre>
+                    </virtual-scroller>
                 </div>
-                <virtual-scroller #scroll [items]="logContent" style="flex: 1;">
-                    <pre *ngFor="let line of scroll.viewPortItems" [innerHtml]="highlight(line, query)"></pre>
-                </virtual-scroller>
-            </div>
+            </ng-container>
+        </ng-template>
+        <ng-template #emptyBlock>
+            <h1 class="title has-text-centered" *ngIf="loading">
+                <fa-icon class="icon" icon="spinner" [spin]="true"></fa-icon> Loading...
+            </h1>
+            <h1 class="title has-text-centered" *ngIf="!loading">No Logs Available</h1>
         </ng-template>
     </div>
 </app-master-detail>

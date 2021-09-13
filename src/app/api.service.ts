@@ -57,6 +57,10 @@ export class ApiService {
     return this.http.get<any>(`logfiles/${id}/`);
   }
 
+  fetchMasterLog() {
+    return this.http.get<any[]>("logfiles/master/");
+  }
+
   performAction(id: number, method: string) {
     let body = {
       method

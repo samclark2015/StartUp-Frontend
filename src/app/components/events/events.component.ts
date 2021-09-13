@@ -57,8 +57,10 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
   query = "";
   lastUpdate?: Date;
   filteredEvents: Event[] = [];
+  mappedEvents: Event[] = [];
   groupedEvents: Event[][] = [];
   loading = false;
+  selectedTraceback?: string;
 
   private moreUrl?: string;
   private socket?: Subscription;
@@ -79,12 +81,30 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
   }
 
   updateFilteredData() {
-    let results =
-      this.query === ""
-        ? this.events
-        : this.events.filter((event) =>
-          event.message.toLowerCase().includes(this.query.toLowerCase())
-        );
+    this.mappedEvents = this.events.map((r: any) => {
+      if (r.event_type == 4) {
+        // traceback
+        let idx = r.message.indexOf('\n');
+        let [message, traceback] = [r.message.substr(0, idx), r.message.substr(idx + 1)];
+        return {
+          ...r,
+          message,
+          traceback
+        }
+      } else {
+        // otherwise
+        return r
+      }
+    });
+
+    let results;
+    if (this.query === "") {
+      results = this.mappedEvents;
+    } else {
+      results = this.mappedEvents.filter((event) =>
+        event.message.toLowerCase().includes(this.query.toLowerCase())
+      );
+    }
 
     let groups = groupBy(results, 'task');
     this.filteredEvents = results;
@@ -112,6 +132,8 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
         return "bug";
       case 3:
         return "check-circle";
+      case 4:
+        return "file-code";
       default:
         return null;
     }
@@ -128,6 +150,10 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
       default:
         return null;
     }
+  }
+
+  showTraceback(event: any) {
+    this.selectedTraceback = event;
   }
 
   private async fetchLatest() {

@@ -48,7 +48,7 @@
                                     <div class="dropdown-content">
                                         <ng-container *ngFor="let action of selectedServer.actions">
                                             <a class="link dropdown-item" *ngIf="!action.primary"
-                                                (click)="handleAction(action)"
+                                                (click)="dropdown.isActive = false; handleAction(action)"
                                                 [class.disabled]="actionPending || (!isAuthenticated && action.protected)">
                                                 {{action.title}}
                                         </a>
@@ -126,7 +126,7 @@
                             <fa-icon [icon]="events.events[0].event_type == 3 ? 'check' : 'exclamation-triangle'">
                             </fa-icon> Server Status
                         </h1>
-                        <p>{{events.events[0].message}}</p>
+                        <p>{{events.mappedEvents[0].message}}</p>
                     </ng-container>
                 </div>
             </div>

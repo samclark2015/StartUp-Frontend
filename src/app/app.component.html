@@ -11,9 +11,14 @@
     <!-- Left side -->
     <div class="level-left">
       <div class="level-item">
-        <a>
+        <!-- <a>
           <span class="title">StartUp</span>
-        </a>
+        </a> -->
+        <div class="navbar-brand">
+          <a class="navbar-item" routerLink="/">
+            <img src="assets/startup-logo.png"/>
+          </a>
+        </div>
       </div>
       <div class="level-item tabs">
         <ul>
@@ -46,6 +51,11 @@
           target="_blank">
           <span class="icon">
             <fa-icon icon="life-ring"></fa-icon>
+          </span>
+        </a>
+        <a routerLink="/logs/master" class="button" title="All Logs">
+          <span class="icon">
+            <fa-icon icon="file-alt"></fa-icon>
           </span>
         </a>
         <a class="button" target="_blank" title="Editor" [href]="'editor/' | backendUrl">

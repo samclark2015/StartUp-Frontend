@@ -9,7 +9,6 @@ import { EventsComponent } from './events/events.component';
 import { FormsModule } from '@angular/forms'; // <--- JavaScript import from Angular
 import { MomentModule } from 'ngx-moment';
 import { VirtualScrollerModule } from 'ngx-virtual-scroller';
-import { UiScrollModule } from 'ngx-ui-scroll';
 
 @NgModule({
   declarations: [MasterDetailComponent, TreeViewComponent, EventsComponent],
@@ -21,7 +20,6 @@ import { UiScrollModule } from 'ngx-ui-scroll';
     FormsModule,
     MomentModule,
     VirtualScrollerModule,
-    UiScrollModule
   ]
 })
 export class ComponentsModule {
