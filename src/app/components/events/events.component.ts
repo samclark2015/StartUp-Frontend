@@ -17,7 +17,8 @@ export interface Event {
   timestamp: Date,
   message: string
   user?: string,
-  isNew?: boolean
+  isNew?: boolean,
+  task?: any
 }
 
 function pairwise(arr: any[], func: (i0: number, a0: any, i1: number, a1: any) => void) {
@@ -106,9 +107,19 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
       );
     }
 
-    let groups = groupBy(results, 'task');
+    // let groups = groupBy(results, 'task');
+    let groups = results.reduce<Event[][]>(function(prev, curr) {
+      if (prev.length && curr.task === prev[prev.length - 1][0].task) {
+          prev[prev.length - 1].push(curr);
+      }
+      else {
+          prev.push([curr]);
+      }
+      return prev;
+  }, []);
     this.filteredEvents = results;
-    this.groupedEvents = Object.values(groups).map(events => events.reverse());
+    // this.groupedEvents = Object.values(groups).map(events => events.reverse());
+    this.groupedEvents = groups.map(events => events.reverse());
   }
 
   ngOnInit(): void {
