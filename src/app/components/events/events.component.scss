@@ -2,7 +2,7 @@ $fade-delay: 5s;
 
 .grid {
   display: grid;
-  grid-template-columns: 48px 21ch 13ch auto 48px;
+  grid-template-columns: 48px 48px 21ch 13ch auto;
   gap: 1rem;
   padding: 0.75rem;
 }

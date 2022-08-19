@@ -130,6 +130,13 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
           this.fetchDashboard();
         }
       }
+
+      let query = params.get("q") ?? undefined;
+      if(query != this.query) {
+        this.query = query;
+        // alert(this.query);
+        this.fetchServers();
+      }
     });
   }
 
@@ -139,9 +146,7 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
   }
 
   handleSearch(q: string) {
-    this.query = q;
-    this.router.navigate([], { queryParams: { "q": q }, queryParamsHandling: "merge", skipLocationChange: true });
-    this.fetchServers();
+    this.router.navigate([], { queryParams: { "q": q }, queryParamsHandling: "merge" });
   }
 
   handleSelect(data: [string, boolean]) {

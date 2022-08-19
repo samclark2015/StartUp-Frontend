@@ -10,6 +10,7 @@ import {
   animate,
   transition,
 } from '@angular/animations';
+import _ from 'lodash';
 
 export interface Event {
   event_type: number
@@ -199,6 +200,11 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
     this.selectedTraceback = event;
   }
 
+  getGroupUser(group: Event[]) {
+    let result = _.find(group, e => e.user != null);
+    return result?.user;
+  }
+
   private async fetchLatest() {
     if (Array.isArray(this.params.obj)) {
       return;
@@ -249,6 +255,7 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
         switch (data.type) {
           case "event.add":
             data.data.isNew = true;
+            data.data.timestamp = new Date(data.data.timestamp);
             this.events.splice(0, 0, data.data);
             this.updateFilteredData();
             this.lastUpdate = new Date();

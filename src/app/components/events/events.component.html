@@ -27,40 +27,37 @@
                 </ng-template>
 
                 <div *ngIf="{collapsed: query == ''} as state">
-                    <div *ngIf="group[group.length - 1].originating_action; else entries">
-                        <div class="grid selectable" (click)="state.collapsed = !state.collapsed" title="Show Full Log">
-                            <div class="event-icon">
-                                <span class="icon" [class]="eventClass(group[group.length - 1].event_type)">
-                                    <fa-icon *ngIf="eventIcon(group[group.length - 1].event_type)"
-                                        [icon]="eventIcon(group[group.length - 1].event_type) || 'question'">
-                                    </fa-icon>
-                                </span>
-                            </div>
-                            <div class="event-timestamp">
-                                {{ group[group.length - 1].timestamp | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
-                            </div>
-                            <div class="event-user">
-                                {{ group[group.length - 1].user }}
-                            </div>
-                            <div class="event-message">
-                                {{ successString(group[group.length - 1].event_type)}} {{ actionName(
-                                group[group.length
-                                - 1].originating_action) }}
-                            </div>
-                            <div>
-                                <span class="icon">
-                                    <fa-icon [icon]="state.collapsed ? 'caret-down' : 'caret-up'"></fa-icon>
-                                </span>
-                            </div>
+                    <div class="grid selectable" (click)="state.collapsed = !state.collapsed" title="Show Full Log">
+                        <div>
+                            <span class="icon">
+                                <fa-icon [icon]="state.collapsed ? 'caret-right' : 'caret-down'"></fa-icon>
+                            </span>
                         </div>
-
-                        <ng-container [ngTemplateOutlet]="entries" *ngIf="!state.collapsed"></ng-container>
+                        <div class="event-icon">
+                            <span class="icon" [class]="eventClass(group[group.length - 1].event_type)">
+                                <fa-icon *ngIf="eventIcon(group[group.length - 1].event_type)"
+                                    [icon]="eventIcon(group[group.length - 1].event_type) || 'question'">
+                                </fa-icon>
+                            </span>
+                        </div>
+                        <div class="event-timestamp">
+                            {{ group[group.length - 1].timestamp | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
+                        </div>
+                        <div class="event-user">
+                            {{ getGroupUser(group) }}
+                        </div>
+                        <div class="event-message">
+                            {{ group[group.length - 1].message }}
+                        </div>
                     </div>
+
+                    <ng-container [ngTemplateOutlet]="entries" *ngIf="!state.collapsed"></ng-container>
                 </div>
 
                 <ng-template #entries>
                     <div *ngFor="let event of group" class="grid" [@newItem]="event.isNew"
                         (@newItem.done)="event.isNew = false" attr.data-task="{{event.task}}">
+                        <div></div>
                         <div class="event-icon">
                             <span class="icon" [class]="eventClass(event.event_type)">
                                 <fa-icon *ngIf="eventIcon(event.event_type)"
@@ -75,7 +72,9 @@
                             {{ event.user }}
                         </div>
                         <div class="event-message">
-                            <pre>{{ event.message }}<a *ngIf="event.event_type==4" (click)="showTraceback(event)"><fa-icon class="icon" icon="external-link-alt" >Show Output</fa-icon></a></pre>
+                            <pre>{{ event.message }}<a *ngIf="event.event_type==4" (click)="showTraceback(event)">
+                                <fa-icon class="icon" icon="external-link-alt">Show Output</fa-icon>
+                            </a></pre>
                         </div>
                     </div>
                 </ng-template>
