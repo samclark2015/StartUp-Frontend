@@ -51,7 +51,7 @@ export class TreeViewComponent extends SubscriptionDelegate implements OnInit {
   }
 
   handleClick(item: TreeItem, event: MouseEvent) {
-    if (item.value !== undefined && event instanceof PointerEvent) {
+    if (item.value !== undefined) {
       if (event.shiftKey) {
         // Shift-click selects or deselects a range...
         let idx = _.findIndex(this.items, { value: item.value });
