@@ -148,14 +148,18 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
     let [id, multiselect] = data;
     let ids;
     if (multiselect) {
-      let idx = this.selectedServersId.indexOf(id.toString());
-
-      if (idx < 0) {
-        ids = this.selectedServersId.concat([id.toString()]);
+      if (Array.isArray(id)) {
+        ids = id;
       } else {
-        // this.selectedServersId.splice(idx, 1);
-        ids = this.selectedServersId.slice();
-        ids.splice(idx, 1);
+        let idx = this.selectedServersId.indexOf(id.toString());
+
+        if (idx < 0) {
+          ids = this.selectedServersId.concat([id.toString()]);
+        } else {
+          // this.selectedServersId.splice(idx, 1);
+          ids = this.selectedServersId.slice();
+          ids.splice(idx, 1);
+        }
       }
     } else {
       ids = [id];
@@ -165,6 +169,7 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
 
   handleCategorySelect(data: [string, boolean]) {
     let [value, multiselect] = data;
+
     this.router.navigate(
       [],
       {

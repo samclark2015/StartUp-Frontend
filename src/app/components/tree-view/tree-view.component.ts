@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import _ from 'lodash';
 import { VirtualScrollerComponent } from 'ngx-virtual-scroller';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -23,10 +24,9 @@ export class TreeViewComponent extends SubscriptionDelegate implements OnInit {
   @Input() public title?: string;
   @Input() public query?: string;
   @Input() public debounceMs: number = 200;
-  @Input() public multiselect: boolean = false;
 
   @Output() public search = new EventEmitter<string>();
-  @Output() public selectItem = new EventEmitter<[string, boolean]>();
+  @Output() public selectItem = new EventEmitter<[string | string[], boolean]>();
 
   @ViewChild("scroll") private scrollElement?: VirtualScrollerComponent;
 
@@ -52,7 +52,26 @@ export class TreeViewComponent extends SubscriptionDelegate implements OnInit {
 
   handleClick(item: TreeItem, event: MouseEvent) {
     if (item.value !== undefined && event instanceof PointerEvent) {
-      this.selectItem.emit([item.value, event.altKey || event.metaKey || event.ctrlKey]);
+      if (event.shiftKey) {
+        // Shift-click selects or deselects a range...
+        let idx = _.findIndex(this.items, { value: item.value });
+        if (idx < 0) return;
+
+        let first = _.findIndex(this.items, { selected: true });
+        let last = _.findLastIndex(this.items, { selected: true });
+
+        let selection;
+          if (idx < first) {
+          selection = this.items.slice(idx, last + 1)
+        } else {
+          selection = this.items.slice(first, idx + 1);
+        }
+        let values = selection.map(item => item.value);
+        this.selectItem.emit([values, true]);
+      } else {
+        // If not shift, we're selecting 1 item (and maybe appending it)
+        this.selectItem.emit([item.value, event.altKey || event.metaKey || event.ctrlKey]);
+      }
     }
   }
 
