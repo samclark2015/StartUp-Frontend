@@ -1,18 +1,20 @@
-<app-master-detail [showDetail]="selectedServerId != null" #masterDetail>
-    <div master [class.is-active]="masterDetail.showCategories">
+<app-master-detail [showDetail]="selectedServer != null" *ngIf="{showCategories: false} as state">
+    <div master [class.is-active]="state.showCategories">
         <app-tree-view [items]="categoryTree" title="Categories"
-            (selectItem)="masterDetail.showCategories = false; handleCategorySelect($event)">
+            (selectItem)="state.showCategories = false; handleCategorySelect($event)">
         </app-tree-view>
     </div>
-    <div master [class.is-active]="!masterDetail.showCategories">
+    <div master [class.is-active]="!state.showCategories">
         <app-tree-view #serverTreeComponent [items]="serverTree" title="Servers" (search)="handleSearch($event)"
-            (selectItem)="handleSelect($event)">
+            (selectItem)="handleSelect($event)" [query]="query">
             <button decoration class="level-item button is-small category-button"
-                (click)="masterDetail.showCategories = !masterDetail.showCategories">Categories</button>
+                (click)="state.showCategories = !state.showCategories">Categories</button>
         </app-tree-view>
     </div>
     <main detail>
-        <ng-container *ngIf="selectedServer; then serverSelected; else noServer"></ng-container>
+        <ng-container *ngIf="selectedServer; then serverSelected"></ng-container>
+        <ng-container *ngIf="selectedServer == null && selectedServers; then manyServersSelected"></ng-container>
+        <ng-container *ngIf="selectedServer == null && selectedServers == null; then noServer"></ng-container>
     </main>
 </app-master-detail>
 
@@ -24,9 +26,9 @@
                     <p class="is-hidden-desktop">
                         <a routerLink="/">&laquo; Server List</a>
                     </p>
-                    <h1 class="title">{{selectedServer.name}}</h1>
+                    <h1 class="title">{{selectedServer?.name}}</h1>
                     <div class="field has-addons">
-                        <ng-container *ngFor="let action of selectedServer.actions">
+                        <ng-container *ngFor="let action of selectedServer?.actions">
                             <p class="control" *ngIf="action.primary">
                                 <button class="button" (click)="handleAction(action)"
                                     [disabled]="actionPending || (!isAuthenticated && action.protected)">
@@ -36,22 +38,23 @@
                         </ng-container>
 
                         <div class="control">
-                            <div class="dropdown is-active" #dropdown>
-                                <div class="dropdown-trigger" (click)="dropdown.isActive = !dropdown.isActive"
+                            <div class="dropdown is-active" *ngIf="{isActive: false} as state">
+                                <div class="dropdown-trigger" (click)="state.isActive = !state.isActive"
                                     title="Extra Actions">
                                     <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-                                        <fa-icon class="icon" [icon]="dropdown.isActive ? 'caret-up' : 'caret-down'">
+                                        <fa-icon class="icon" [icon]="state.isActive ? 'caret-up' : 'caret-down'">
                                         </fa-icon>
                                     </button>
                                 </div>
-                                <div class="dropdown-menu" id="dropdown-menu" role="menu" @openClose *ngIf="dropdown.isActive">
+                                <div class="dropdown-menu" id="dropdown-menu" role="menu" @openClose
+                                    *ngIf="state.isActive">
                                     <div class="dropdown-content">
-                                        <ng-container *ngFor="let action of selectedServer.actions">
+                                        <ng-container *ngFor="let action of selectedServer?.actions">
                                             <a class="link dropdown-item" *ngIf="!action.primary"
-                                                (click)="dropdown.isActive = false; handleAction(action)"
+                                                (click)="state.isActive = false; handleAction(action)"
                                                 [class.disabled]="actionPending || (!isAuthenticated && action.protected)">
                                                 {{action.title}}
-                                        </a>
+                                            </a>
                                         </ng-container>
                                     </div>
                                 </div>
@@ -65,16 +68,18 @@
                     <fa-icon icon="circle-notch" [spin]="true"></fa-icon>
                 </span>
                 <div class="level-item">
-                    <p><a target="_blank" [href]="'editor/' + selectedServer.id | backendUrl">Edit</a></p>
+                    <p><a target="_blank" [href]="'editor/' + selectedServer?.id | backendUrl">Edit</a></p>
                 </div>
             </div>
         </div>
         <div class=" columns overview">
-            <div class="column is-half" *ngIf="selectedServer.sysmon_status as st">
+            <div class="column is-half" *ngIf="selectedServer?.sysmon_status as st">
                 <div class="box">
-                    <h1 class="subtitle" [class.has-text-danger]="st.LastStatus != 'OK'">
+                    <h1 class="subtitle">
                         <span class="icon">
-                            <fa-icon [icon]="st.LastStatus == 'OK' ? 'check' : 'exclamation-triangle'">
+                            <fa-icon [class.has-text-danger]="st.LastStatus != 'OK'"
+                                [class.has-text-success]="st.LastStatus == 'OK'"
+                                [icon]="st.LastStatus == 'OK' ? 'check-circle' : 'exclamation-triangle'">
                             </fa-icon>
                         </span>
                         System Monitor Status
@@ -122,8 +127,9 @@
             <div class="column is-half" *ngIf="events.events.length > 0">
                 <div class="box">
                     <ng-container>
-                        <h1 class="subtitle" [class.has-text-danger]="events.events[0].event_type != 3">
-                            <fa-icon [icon]="events.events[0].event_type == 3 ? 'check' : 'exclamation-triangle'">
+                        <h1 class="subtitle">
+                            <fa-icon [icon]="events.eventIcon(events.events[0].event_type) || 'question'"
+                                [class]="events.eventClass(events.events[0].event_type)">
                             </fa-icon> Server Status
                         </h1>
                         <p>{{events.mappedEvents[0].message}}</p>
@@ -144,7 +150,7 @@
                         </span>
                     </span>
                     <span class="level-right">
-                        <span class="level-item">{{ details.length }} Items</span>
+                        <span class="level-item">{{ this.selectedServer?.details?.length }} Items</span>
                     </span>
                 </span>
             </p>
@@ -152,7 +158,7 @@
                 <table class="table is-fullwidth">
                     <col width="175" />
                     <tbody>
-                        <tr *ngFor="let item of details">
+                        <tr *ngFor="let item of this.selectedServer?.details">
                             <td>{{ item.title }}</td>
                             <td>{{ item.value }}</td>
                         </tr>
@@ -175,18 +181,94 @@
                 </span>
             </p>
             <div class="panel-block">
-                <app-events #events url="events/" [params]="{ obj: selectedServerId }" class="events">
+                <app-events #events url="events/" [params]="{ obj: selectedServer?.id}" class="events">
                 </app-events>
             </div>
         </nav>
     </div>
 </ng-template>
 
+<ng-template #manyServersSelected>
+    <div class="is-flex-col server-detail">
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item is-flex-col is-align-items-start">
+                    <p class="is-hidden-desktop">
+                        <a routerLink="/">&laquo; Server List</a>
+                    </p>
+                    <h1 class="title">{{selectedServers?.length}} Servers Selected</h1>
+                    <div class="field has-addons">
+                        <ng-container *ngFor="let action of availableActions">
+                            <p class="control" *ngIf="action.primary">
+                                <button class="button" (click)="handleAction(action)"
+                                    [disabled]="actionPending || (!isAuthenticated && action.protected)">
+                                    {{action.title}}
+                                </button>
+                            </p>
+                        </ng-container>
+
+                        <div class="control">
+                            <div class="dropdown is-active" *ngIf="{isActive: false} as state">
+                                <div class="dropdown-trigger" (click)="state.isActive = !state.isActive"
+                                    title="Extra Actions">
+                                    <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                                        <fa-icon class="icon" [icon]="state.isActive ? 'caret-up' : 'caret-down'">
+                                        </fa-icon>
+                                    </button>
+                                </div>
+                                <div class="dropdown-menu" id="dropdown-menu" role="menu" @openClose
+                                    *ngIf="state.isActive">
+                                    <div class="dropdown-content">
+                                        <ng-container *ngFor="let action of availableActions">
+                                            <a class="link dropdown-item" *ngIf="!action.primary"
+                                                (click)="state.isActive = false; handleAction(action)"
+                                                [class.disabled]="actionPending || (!isAuthenticated && action.protected)">
+                                                {{action.title}}
+                                            </a>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="level-right">
+                <span class="icon level-item" *ngIf="actionPending">
+                    <fa-icon icon="circle-notch" [spin]="true"></fa-icon>
+                </span>
+                <div class="level-item">
+                    <p><a target="_blank" [href]="'editor/' + selectedServer?.id | backendUrl">Edit</a></p>
+                </div>
+            </div>
+        </div>
+        <nav class="panel is-shadowless" [class.is-collapsed]="eventCollapse">
+            <p class="panel-heading selectable" (click)="eventCollapse = !eventCollapse">
+                <span class="level is-mobile">
+                    <span class="level-left">
+                        <span class="level-item">
+                            <span class="icon">
+                                <fa-icon [icon]="eventCollapse ? 'caret-right' : 'caret-down'"></fa-icon>
+                            </span>
+                            Events
+                        </span>
+                    </span>
+                </span>
+            </p>
+            <div class="panel-block">
+                <app-events #events url="events/" [params]="{ obj: selectedServersId }" class="events">
+                </app-events>
+            </div>
+        </nav>
+    </div>
+</ng-template>
+
+
 <ng-template #noServer>
     <div class="flex-centered">
-        <div class="box is-flex-col" style="max-height: 100%">
+        <div class="box is-flex-col bad-servers">
             <ng-container
-                *ngIf="!selectedServerId && dashboard && dashboard.bad_servers.length > 0; else allServersGood">
+                *ngIf="(selectedServers?.length || 0) == 0 && dashboard && dashboard.bad_servers.length > 0; else allServersGood">
                 <h2 class="subtitle">
                     <span class="icon has-text-danger">
                         <fa-icon icon="exclamation-triangle"></fa-icon>
@@ -195,7 +277,7 @@
                 </h2>
                 <ul class="scrollable">
                     <li *ngFor="let server of dashboard.bad_servers">
-                        <a [routerLink]="['../', server.id]">{{ server.name }}</a>
+                        <a [routerLink]="[]" [queryParams]="{id: server.id}">{{ server.name }}</a>
                     </li>
                 </ul>
             </ng-container>
@@ -205,7 +287,7 @@
 </ng-template>
 
 <ng-template #allServersGood>
-    <ng-container *ngIf="dashboard && !selectedServerId; else loading">
+    <ng-container *ngIf="(selectedServers?.length || 0) == 0 && dashboard; else loading">
         <h2 class="subtitle">
             <span class="icon has-text-success">
                 <fa-icon icon="check"></fa-icon>
@@ -214,6 +296,7 @@
         </h2>
     </ng-container>
 </ng-template>
+
 <ng-template #loading>
     <h2 class="subtitle">
         <span class="icon">

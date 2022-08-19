@@ -1,10 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TreeItem, TreeViewComponent } from 'src/app/components/tree-view/tree-view.component';
-import { ApiService, DashboardView } from '../api.service';
+import { ApiService } from '../api.service';
+import { DashboardView, Server } from "../models";
 import { SubscriptionDelegate } from '../subscription-delegate';
 import details from './details.json';
-import { merge, Subscription } from 'rxjs';
+import { forkJoin, merge, Subscription } from 'rxjs';
 import { AuthService } from '../auth.service';
 import {
   trigger,
@@ -12,6 +13,7 @@ import {
   animate,
   transition,
 } from '@angular/animations';
+import _ from 'lodash';
 
 @Component({
   selector: 'app-server-index',
@@ -20,11 +22,12 @@ import {
   animations: [
     trigger('openClose', [
       transition(':enter', [
-        style({ opacity: 0 }),
-        animate('100ms ease-in', style({ opacity: 1 }))
+        style({ transform: "scale(0)", transformOrigin: "top left" }),
+        animate('150ms ease-out', style({ transform: "scale(1)" }))
       ]),
       transition(':leave', [
-        animate('100ms ease-in', style({ opacity: 0 }))
+        style({ transform: "scale(1)", transformOrigin: "top left" }),
+        animate('150ms ease-in', style({ transform: "scale(0)" }))
       ]),
     ]),
   ],
@@ -33,82 +36,101 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
 
   @ViewChild("serverTreeComponent") private serverTreeComponent?: TreeViewComponent;
 
+  // Dashboard info
+  dashboard?: DashboardView;
+
+  // Tree items
+  serverTree: TreeItem[] = [];
+  categoryTree: TreeItem[] = [];
+
+  // Component state
+  availableActions: any[] = [];
+  selectedServersId: string[] = [];
+  selectedServers?: Server[];
+  selectedCategory?: any;
+  detailCollapse = true;
+  eventCollapse = false;
+  actionPending = false;
+  query?: string;
+
+  private servers: any[] = [];
+  private rawCategories: any[] = [];
+  private socket?: Subscription;
+  private currentRequest?: Subscription;
+
   constructor(private api: ApiService, private route: ActivatedRoute, private router: Router, private auth: AuthService) {
     super();
   }
 
-  dashboard?: DashboardView;
-
-  serverTree: TreeItem[] = [];
-  categoryTree: TreeItem[] = [];
-  selectedServer?: any;
-  selectedCategory?: any;
-  details: any[] = [];
-
-  detailCollapse = true;
-  eventCollapse = false;
-
-  actionPending = false;
-
-  private servers: any[] = [];
-  private _selectedServerId?: number;
-  private query?: string;
-  private socket?: Subscription;
-
-  get selectedServerId(): number | undefined {
-    return this._selectedServerId;
-  }
-
-  set selectedServerId(id: number | undefined) {
-    this._selectedServerId = id;
-    this.selectedServer = undefined;
-    this.actionPending = false;
-    this.rebuildServerTree();
-    this.socket?.unsubscribe();
-    if (id) {
-      // this.serverTreeComponent?.scrollToItemWithValue(id);
-      this.api.fetchServer(id).subscribe((server) => {
-        this.selectedServer = server;
-        this.details = details.filter(detail => this.selectedServer[detail.field]).map(detail => {
-          return {
-            title: detail.title,
-            value: this.selectedServer[detail.field]
-          }
-        });
-        this.actionPending = server.current_job != null;
-        this.socket = merge(
-          this.api.subscribeWS("servers." + id),
-          this.api.subscribeWS("sysmon." + server.name),
-        ).subscribe(message => {
-          switch (message.type) {
-            case "job.complete":
-              this.actionPending = false;
-              break;
-            case "sysmon.update":
-              this.selectedServer.sysmon_status = message.data;
-              break;
-            default:
-              break
-          }
-        });
-      });
-
-    } else {
-      this.fetchDashboard();
-    }
-  }
-
-
   ngOnInit(): void {
+    this.query = this.route.snapshot.queryParams["q"];
+
+    this.api.fetchCategories().toPromise().then(data => {
+      this.rawCategories = data;
+      this.rebuildCategoryTree();
+    });
+
     this.fetchServers();
-    this.addSub(this.route.paramMap.subscribe((map) => {
-      let id = map.get("id");
-      if (id) {
-        this.selectedServerId = parseInt(id);
-      } else {
-        this.selectedServerId = undefined;
+    this.subscribe(this.route.queryParamMap, params => {
+      const path = params.get("path");
+      if (path != this.selectedCategory) {
+        this.selectedCategory = path;
+        this.rebuildCategoryTree();
+        this.fetchServers();
       }
-    }));
+
+      let ids = params.getAll("id");
+      if (ids.length == 0 || !_.isEqual(ids, this.selectedServersId)) {
+        this.selectedServersId = ids;
+
+        this.selectedServers = undefined;
+        this.dashboard = undefined;
+        this.actionPending = false;
+        this.rebuildServerTree();
+
+        this.socket?.unsubscribe();
+        this.currentRequest?.unsubscribe();
+
+        if (ids.length == 1) {
+          let id = ids[0];
+          this.currentRequest = this.api.fetchServer(id).subscribe((server) => {
+            this.selectedServers = [{
+              ...server,
+              details: details.filter(detail => server[detail.field]).map(detail => {
+                return {
+                  title: detail.title,
+                  value: server[detail.field]
+                }
+              })
+            }];
+            this.availableActions = this.selectedServers[0].actions;
+            this.actionPending = server.current_job != null;
+            this.socket = merge(
+              this.api.subscribeWS(`servers.${id}`),
+              this.api.subscribeWS(`sysmon.${server.name}`),
+            ).subscribe(message => {
+              switch (message.type) {
+                case "job.complete":
+                  this.actionPending = false;
+                  break;
+                case "sysmon.update":
+                  if (this.selectedServers) this.selectedServers[0].sysmon_status = message.data;
+                  break;
+                default:
+                  break
+              }
+            });
+          });
+        } else if (ids.length > 1) {
+          this.currentRequest = forkJoin(ids.map(id => this.api.fetchServer(id))).subscribe(servers => {
+            this.selectedServers = servers;
+            this.availableActions = _.intersectionBy(...this.selectedServers.map(s => s.actions), "method");
+          })
+        } else {
+          this.fetchDashboard();
+        }
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -116,19 +138,88 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
     this.socket?.unsubscribe();
   }
 
+  handleSearch(q: string) {
+    this.query = q;
+    this.router.navigate([], { queryParams: { "q": q }, queryParamsHandling: "merge", skipLocationChange: true });
+    this.fetchServers();
+  }
+
+  handleSelect(data: [string, boolean]) {
+    let [id, multiselect] = data;
+    let ids;
+    if (multiselect) {
+      let idx = this.selectedServersId.indexOf(id.toString());
+
+      if (idx < 0) {
+        ids = this.selectedServersId.concat([id.toString()]);
+      } else {
+        // this.selectedServersId.splice(idx, 1);
+        ids = this.selectedServersId.slice();
+        ids.splice(idx, 1);
+      }
+    } else {
+      ids = [id];
+    }
+    this.router.navigate(["servers"], { queryParams: { id: ids }, queryParamsHandling: "merge" });
+  }
+
+  handleCategorySelect(data: [string, boolean]) {
+    let [value, multiselect] = data;
+    this.router.navigate(
+      [],
+      {
+        relativeTo: this.route,
+        queryParams: { path: value },
+        queryParamsHandling: 'merge', // remove to replace all query params by provided
+      });
+  }
+
+  getSysMonName(name: string) {
+    return name == "No Longer Watched"
+      ? name
+      : `Monitored by ${name}`
+  }
+
+  async handleAction(action: any) {
+    if (this.selectedServer) {
+      this.actionPending = true;
+      try {
+        await this.api.performAction(this.selectedServer?.id, action.method).toPromise();
+      } finally {
+        this.actionPending = false;
+      }
+    } else if (this.selectedServersId.length > 1) {
+      this.actionPending = true;
+      try {
+        await Promise.all(this.selectedServersId.map(id => this.api.performAction(id, action.method).toPromise()));
+      } finally {
+        this.actionPending = false;
+      }
+    }
+  }
+
+  get isAuthenticated() {
+    return this.auth.isAuthenticated();
+  }
+
+  get selectedServer() {
+    if (this.selectedServers == null || this.selectedServers.length > 1) {
+      return undefined;
+    }
+    return this.selectedServers[0];
+  }
+
+
   private fetchDashboard() {
     this.api.fetchDashboard().subscribe((dash) => this.dashboard = dash);
   }
 
   private fetchServers() {
-    this.api.fetchServers(this.query, this.selectedCategory).subscribe(this.handleServers.bind(this));
+    this.api.fetchServers(this.query, this.selectedCategory).subscribe(data => {
+      this.servers = data;
+      this.rebuildServerTree();
+    });
 
-  }
-
-  private handleServers(data: any[]) {
-    this.servers = data;
-    this.rebuildServerTree();
-    this.rebuildCategoryTree();
   }
 
   private rebuildServerTree() {
@@ -138,24 +229,21 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
         subtitle: server.console_file_path,
         value: server.id,
         collapsed: false,
-        selected: server.id == this.selectedServerId
+        selected: this.selectedServersId.includes(server.id.toString())
       };
     });
-    // if(this.selectedServerId != null) {
-    // this.serverTreeComponent?.scrollToItemWithValue(this._selectedServerId);
-    // }
   }
 
-  private async rebuildCategoryTree() {
-    let data = await this.api.fetchCategories().toPromise();
-
+  private rebuildCategoryTree() {
     let categories: TreeItem[] = [];
-    data.forEach((category: any) => {
+    this.rawCategories.forEach((category: any) => {
       var tree = categories;
       category.tree.forEach((dir: string, idx: number) => {
         var ent = tree.find(ent => ent.title == dir);
         if (ent == null) {
           let value = category.tree.slice(0, idx + 1).join("/");
+          if (value == "global") value = null;
+
           ent = {
             title: dir,
             selected: value == this.selectedCategory,
@@ -170,44 +258,4 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
     this.categoryTree = categories;
   }
 
-
-  handleSearch(q: string) {
-    this.query = q;
-    this.fetchServers();
-  }
-
-  handleSelect(id: number) {
-    this.router.navigate(["servers", id]);
-  }
-
-  handleCategorySelect(value: string) {
-    this.selectedCategory = value;
-    this.rebuildCategoryTree();
-    this.fetchServers();
-  }
-
-  async handleAction(action: any) {
-    if (!this.selectedServerId)
-      return
-    this.actionPending = true;
-    try {
-      await this.api.performAction(this.selectedServerId, action.method).toPromise();
-    } catch {
-      this.actionPending = false;
-    }
-  }
-
-  getSysMonName(name: string) {
-    return name == "No Longer Watched"
-      ? name
-      : `Monitored by ${name}`
-  }
-
-  get jsonData() {
-    return JSON.stringify(this.selectedServer, null, 2);
-  }
-
-  get isAuthenticated() {
-    return this.auth.isAuthenticated();
-  }
 }

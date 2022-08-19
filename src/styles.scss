@@ -69,7 +69,7 @@ tr.sticky {
 
 
 .is-flex-col {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     /* height: 100%; */
 }

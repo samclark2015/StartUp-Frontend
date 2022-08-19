@@ -64,55 +64,6 @@
           </span>
         </a>
       </div>
-      <!-- <button-group class="level-item" :right-align="true">
-        <template v-slot:primary>
-          <p class="control">
-            <a class="button" v-if="authenticated" :href="logoutLink + '?next=' + currentPath">
-              <span class="icon">
-                <fa-icon icon="sign-out-alt"></fa-icon>
-              </span>
-              <span>Logout {{ $store.state.authorization.username }}</span>
-            </a>
-            <button class="button" v-else-if="screenlockAuthenticated" disabled>
-              {{ $store.state.authorization.screenlockUser }} (ScreenLock)
-            </button>
-            <a class="button" :href="loginLink + '?next=' + currentPath" v-else>
-              <span class="icon">
-                <fa-icon icon="sign-in-alt"></fa-icon>
-              </span>
-              <span>Login</span>
-            </a>
-          </p>
-          <p class="control">
-            <a title="Documentation" class="button" href="https://gitlab.pbn.bnl.gov/StartUp/frontend/-/wikis/home"
-              target="_blank">
-              <span class="icon">
-                <fa-icon icon="life-ring"></fa-icon>
-              </span>
-            </a>
-          </p>
-        </template>
-        <template v-slot:secondary>
-          <a class="dropdown-item" :to="{ name: 'all-events' }">
-            <span class="icon">
-              <fa-icon icon="book"></fa-icon>
-            </span>
-            <span>All Events</span>
-          </a>
-          <a class="dropdown-item" :href="editorLink" target="_blank">
-            <span class="icon">
-              <fa-icon icon="edit"></fa-icon>
-            </span>
-            <span>Editor</span>
-          </a>
-          <a class="dropdown-item" :to="{ name: 'settings' }">
-            <span class="icon">
-              <fa-icon icon="sliders-h"></fa-icon>
-            </span>
-            <span>Settings</span>
-          </a>
-        </template>
-      </button-group> -->
     </div>
   </nav>
   <div id="content">

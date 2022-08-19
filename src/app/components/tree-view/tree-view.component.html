@@ -7,7 +7,7 @@
     </div>
     <div class="sticky tree-view__search tree-view__header field" *ngIf="hasSearchListener">
         <p class="control has-icons-left">
-            <input type="text" class="input" placeholder="Search..." (keyup)="handleSearch($event)" />
+            <input type="text" class="input" placeholder="Search..." (keyup)="handleSearch($event)" [value]="query || ''"/>
             <span class="icon is-small is-left">
                 <fa-icon icon="search"></fa-icon>
             </span>
@@ -28,7 +28,7 @@
     <ul class="tree-view__items">
         <li class="tree-item">
             <div class="tree-item__content" [class.selected]="item.selected" [style.paddingLeft.px]="5+28*depth"
-                (click)="handleClick(item)">
+                (click)="handleClick(item, $event)">
                 <div class="tree-item__root selectable">
                     <h3 class="tree-item__label tree-item__title" [title]="item.title">
                         <span class="selectable icon" *ngIf="item.children && item.children.length > 0"

@@ -1,7 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild } from '@angular/core';
-import { groupBy } from 'lodash-es';
-import { Subscription } from 'rxjs';
+import { Subscription, merge, concat } from 'rxjs';
 import { ApiService } from 'src/app/api.service';
 import { SubscriptionDelegate } from 'src/app/subscription-delegate';
 import {
@@ -13,20 +12,13 @@ import {
 } from '@angular/animations';
 
 export interface Event {
-  type: number
+  event_type: number
   timestamp: Date,
   message: string
   user?: string,
   isNew?: boolean,
   task?: any
 }
-
-function pairwise(arr: any[], func: (i0: number, a0: any, i1: number, a1: any) => void) {
-  for (var i = 0; i < arr.length - 1; i++) {
-    func(i, arr[i], i + 1, arr[i + 1])
-  }
-}
-
 
 @Component({
   selector: 'app-events',
@@ -61,7 +53,7 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
   mappedEvents: Event[] = [];
   groupedEvents: Event[][] = [];
   loading = false;
-  selectedTraceback?: string;
+  selectedTraceback?: any;
 
   private moreUrl?: string;
   private socket?: Subscription;
@@ -73,7 +65,12 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
   }
 
   set events(events) {
-    this._events = events;
+    this._events = events.map(event => {
+      return {
+        ...event,
+        timestamp: new Date(event.timestamp)
+      }
+    });
     this.updateFilteredData();
   }
 
@@ -107,18 +104,28 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
       );
     }
 
-    // let groups = groupBy(results, 'task');
-    let groups = results.reduce<Event[][]>(function(prev, curr) {
-      if (prev.length && curr.task === prev[prev.length - 1][0].task) {
-          prev[prev.length - 1].push(curr);
+    let groups = results.reduce<Event[][]>(function (groups, curr) {
+      let reordered = false;
+      for (let [idx, group] of groups.entries()) {
+        if (group.length > 0 &&
+          ((curr.task != null && curr.task == group[0].task) ||
+            (
+              curr.task == null && ((curr as any).obj_name == (group as any)[0].obj_name &&
+                Math.abs(curr.timestamp.getTime() - group[0].timestamp.getTime()) < 60_000)
+            ))) {
+          let new_group = groups.splice(idx, 1)[0];
+          new_group.push(curr);
+          groups.push(new_group);
+          reordered = true;
+          break;
+        }
       }
-      else {
-          prev.push([curr]);
+      if (!reordered) {
+        groups.push([curr]);
       }
-      return prev;
-  }, []);
+      return groups;
+    }, []);
     this.filteredEvents = results;
-    // this.groupedEvents = Object.values(groups).map(events => events.reverse());
     this.groupedEvents = groups.map(events => events.reverse());
   }
 
@@ -163,11 +170,40 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
     }
   }
 
+  successString(type: number) {
+    switch (type) {
+      case 1:
+      case 2:
+        return "Failed";
+      case 3:
+        return "Successful";
+      default:
+        return "Ongoing";
+    }
+  }
+
+  actionName(action: string) {
+    switch (action) {
+      case "start_action":
+        return "start";
+      case "stop_action":
+        return "stop";
+      case "check_action":
+        return "check";
+      default:
+        return "action";
+    }
+  }
+
   showTraceback(event: any) {
     this.selectedTraceback = event;
   }
 
   private async fetchLatest() {
+    if (Array.isArray(this.params.obj)) {
+      return;
+    }
+
     this.loading = true;
     let params = new HttpParams({ fromObject: this.params });
     let data = await this.http.get<any>(this.url, { params }).toPromise();
@@ -178,6 +214,10 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
   }
 
   private async fetchOlder() {
+    if (Array.isArray(this.params.obj)) {
+      return;
+    }
+
     if (!this.moreUrl)
       return;
     let data = await this.http.get<any>(this.moreUrl).toPromise();
@@ -185,28 +225,39 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
     this.moreUrl = data.next;
   }
 
-  private subscribeWS() {
+  private async subscribeWS() {
     if (this.socket) {
       this.socket.unsubscribe();
       this.socket = undefined;
     }
-    if (!this.params.obj) {
-      return;
-    }
-    this.socket = this.api.subscribeWS("events." + this.params.obj).subscribe(async (data: any) => {
-      switch (data.type) {
-        case "event.add":
-          data.data.isNew = true;
-          this.events.splice(0, 0, data.data);
-          this.updateFilteredData();
-          // this.scroller?.nativeElement.scrollTo(0, 0);
-          this.lastUpdate = new Date();
-          break;
-        default:
-          break;
+
+    if (this.params.obj) {
+      let obs;
+      if (Array.isArray(this.params.obj)) {
+        let details = await Promise.all(this.params.obj.map((id: string) => this.api.fetchServer(id).toPromise()));
+        obs = merge(...details.map((server: any) => this.api.subscribeWS(
+          "events." + server.id,
+          {
+            "obj_name": server.name,
+            "obj_type": server.type,
+            "obj_console_file_path": server.console_file_path
+          })));
+      } else {
+        obs = this.api.subscribeWS("events." + this.params.obj);
       }
-    });
-    this.addSub(this.socket);
+      this.socket = this.subscribe(obs, async (data: any) => {
+        switch (data.type) {
+          case "event.add":
+            data.data.isNew = true;
+            this.events.splice(0, 0, data.data);
+            this.updateFilteredData();
+            this.lastUpdate = new Date();
+            break;
+          default:
+            break;
+        }
+      });
+    }
   }
 
   async handleScroll(event: any) {

@@ -31,7 +31,7 @@ export class LogfileIndexComponent extends SubscriptionDelegate implements OnIni
 
   ngOnInit(): void {
     this.loadLogFiles();
-    this.addSub(this.route.paramMap.subscribe(map => {
+    this.subscribe(this.route.paramMap, map => {
       let id = map.get("id");
       if (id) {
         this.loadLogFile(id);
@@ -39,7 +39,7 @@ export class LogfileIndexComponent extends SubscriptionDelegate implements OnIni
         this.logContent = [];
       }
       this.rebuildList();
-    }))
+    });
   }
 
   ngOnDestroy() {
@@ -116,7 +116,7 @@ export class LogfileIndexComponent extends SubscriptionDelegate implements OnIni
   }
 
   handleSearch(idx?: number) {
-    if(idx != null) 
+    if (idx != null)
       this.scroll?.scrollToIndex(idx);
   }
 

@@ -21,11 +21,12 @@ export class TreeViewComponent extends SubscriptionDelegate implements OnInit {
 
   @Input() public items: TreeItem[] = [];
   @Input() public title?: string;
+  @Input() public query?: string;
   @Input() public debounceMs: number = 200;
-
+  @Input() public multiselect: boolean = false;
 
   @Output() public search = new EventEmitter<string>();
-  @Output() public selectItem = new EventEmitter<string>();
+  @Output() public selectItem = new EventEmitter<[string, boolean]>();
 
   @ViewChild("scroll") private scrollElement?: VirtualScrollerComponent;
 
@@ -37,19 +38,21 @@ export class TreeViewComponent extends SubscriptionDelegate implements OnInit {
   }
 
   ngOnInit(): void {
-    this.addSub(this.inputSubject.pipe(
+    this.subscribe(this.inputSubject.pipe(
       debounceTime(this.debounceMs),
       distinctUntilChanged()
-    ).subscribe((value) => this.search.emit(value)));
+    ), (v) => {
+      this.search.emit(v);
+    });
   }
 
   get hasSearchListener() {
     return this.search.observers.length > 0;
   }
 
-  handleClick(item: TreeItem) {
-    if (item.value != null) {
-      this.selectItem.emit(item.value);
+  handleClick(item: TreeItem, event: MouseEvent) {
+    if (item.value !== undefined && event instanceof PointerEvent) {
+      this.selectItem.emit([item.value, event.altKey || event.metaKey || event.ctrlKey]);
     }
   }
 
@@ -62,7 +65,7 @@ export class TreeViewComponent extends SubscriptionDelegate implements OnInit {
     this.toggleCollapsed(item);
   }
 
-  tracker(item: TreeItem) {
+  tracker(index: number, item: TreeItem) {
     return item.value;
   }
 
@@ -72,9 +75,10 @@ export class TreeViewComponent extends SubscriptionDelegate implements OnInit {
 
   public scrollToItemWithValue(value: any) {
     let idx = this.items.findIndex(item => item.value == value);
-    if (idx < 0)
-      return;
-    this.scrollElement?.scrollToIndex(idx, false);
+    if (idx >= 0) {
+      this.scrollElement?.scrollToIndex(idx, true);
+    }
+
   }
 
   private toggleCollapsed(item: TreeItem) {

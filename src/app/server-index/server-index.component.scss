@@ -157,3 +157,11 @@ a.disabled {
 }
 
 
+.bad-servers {
+  overflow-y: hidden;
+  max-height: 90%;
+
+  & ul {
+    overflow-y: auto;
+  }
+}

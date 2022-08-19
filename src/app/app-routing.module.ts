@@ -8,12 +8,7 @@ import { ServerIndexComponent } from './server-index/server-index.component';
 const routes: Routes = [
   {
     path: "",
-    redirectTo: "servers/",
-    pathMatch: "full"
-  },
-  {
-    path: "servers",
-    redirectTo: "servers/",
+    redirectTo: "servers",
     pathMatch: "full"
   },
   {
@@ -26,7 +21,7 @@ const routes: Routes = [
     component: MasterLogComponent
   },
   {
-    path: "servers/:id",
+    path: "servers",
     component: ServerIndexComponent
   },
   {

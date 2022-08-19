@@ -1,19 +1,11 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import _ from 'lodash';
 import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
 import { ConfigService } from './config.service';
+import { DashboardView } from './models';
 
 const CHANNEL_RE = /[^a-zA-Z0-9\-\.]/g;
-
-export interface DashboardItem {
-  "name": string;
-  "console_file_path": string;
-  "url": string;
-  "id": number;
-}
-export interface DashboardView {
-  "bad_servers": DashboardItem[];
-}
 
 @Injectable({
   providedIn: 'root'
@@ -37,7 +29,7 @@ export class ApiService {
     return this.http.get<any[]>("servers/", { params });
   }
 
-  fetchServer(id: number) {
+  fetchServer(id: string | number) {
     return this.http.get<any>(`servers/${id}/`);
   }
 
@@ -61,14 +53,14 @@ export class ApiService {
     return this.http.get<any[]>("logfiles/master/");
   }
 
-  performAction(id: number, method: string) {
+  performAction(id: string | number, method: string) {
     let body = {
       method
     }
     return this.http.post<any>(`servers/${id}/action/`, body);
   }
 
-  subscribeWS(channel: string) {
+  subscribeWS(channel: string, criteria: any = undefined) {
     channel = channel.replace(CHANNEL_RE, "-");
     const obs = this.wsSubject.multiplex(
       () => ({
@@ -79,7 +71,10 @@ export class ApiService {
         type: "unsubscribe",
         data: channel,
       }),
-      () => true
+      (data) => {
+        if(criteria == null) return true;
+        return _.isMatch(data.data, criteria);
+      }
     );
 
     return obs;
