@@ -13,6 +13,7 @@ build:
       - node_modules/
   script:
     - export PATH=/home/here/user/bin/:$PATH
+    - export npm_config_cache=$(mktemp -d) 
     - npm install
     - npx ng build --prod
   tags:
