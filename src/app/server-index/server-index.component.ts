@@ -52,18 +52,20 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
   eventCollapse = false;
   actionPending = false;
   query?: string;
+  initialQuery?: string;
 
   private servers: any[] = [];
   private rawCategories: any[] = [];
   private socket?: Subscription;
   private currentRequest?: Subscription;
+  private fetchServerRequest?: Subscription;
 
   constructor(private api: ApiService, private route: ActivatedRoute, private router: Router, private auth: AuthService) {
     super();
   }
 
   ngOnInit(): void {
-    this.query = this.route.snapshot.queryParams["q"];
+    this.initialQuery = this.query = this.route.snapshot.queryParams["q"];
 
     this.api.fetchCategories().toPromise().then(data => {
       this.rawCategories = data;
@@ -195,14 +197,14 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
       this.actionPending = true;
       try {
         await this.api.performAction(this.selectedServer?.id, action.method).toPromise();
-      } finally {
+      } catch {
         this.actionPending = false;
       }
     } else if (this.selectedServersId.length > 1) {
       this.actionPending = true;
       try {
         await Promise.all(this.selectedServersId.map(id => this.api.performAction(id, action.method).toPromise()));
-      } finally {
+      } catch {
         this.actionPending = false;
       }
     }
@@ -225,11 +227,11 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
   }
 
   private fetchServers() {
-    this.api.fetchServers(this.query, this.selectedCategory).subscribe(data => {
+    this.fetchServerRequest?.unsubscribe();
+    this.fetchServerRequest = this.api.fetchServers(this.query, this.selectedCategory).subscribe(data => {
       this.servers = data;
       this.rebuildServerTree();
     });
-
   }
 
   private rebuildServerTree() {

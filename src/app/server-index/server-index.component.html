@@ -6,7 +6,7 @@
     </div>
     <div master [class.is-active]="!state.showCategories">
         <app-tree-view #serverTreeComponent [items]="serverTree" title="Servers" (search)="handleSearch($event)"
-            (selectItem)="handleSelect($event)" [query]="query">
+            (selectItem)="handleSelect($event)" [query]="initialQuery">
             <button decoration class="level-item button is-small category-button"
                 (click)="state.showCategories = !state.showCategories">Categories</button>
         </app-tree-view>
@@ -181,7 +181,7 @@
                 </span>
             </p>
             <div class="panel-block">
-                <app-events #events url="events/" [params]="{ obj: selectedServer?.id}" class="events">
+                <app-events #events url="events/" [params]="{ obj: selectedServer?.id}" class="events"  style="height: 80vh">
                 </app-events>
             </div>
         </nav>
