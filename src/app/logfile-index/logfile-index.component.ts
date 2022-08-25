@@ -73,7 +73,8 @@ export class LogfileIndexComponent extends SubscriptionDelegate implements OnIni
     }
   }
 
-  handleSelection(id: number) {
+  handleSelection(event: [number, boolean]) {
+    let [id, _] = event;
     this.router.navigate(['logs', id.toString()]);
   }
 
