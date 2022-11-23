@@ -249,7 +249,7 @@ export class EventsComponent extends SubscriptionDelegate implements OnInit, OnC
             "obj_console_file_path": server.console_file_path
           })));
       } else {
-        obs = this.api.subscribeWS("events." + this.params.obj);
+        obs = this.api.subscribeWS("StartUp.events." + this.params.obj);
       }
       this.socket = this.subscribe(obs, async (data: any) => {
         switch (data.type) {
