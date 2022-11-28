@@ -15,7 +15,7 @@ export class ApiService {
   private wsSubject: WebSocketSubject<any>;
 
   constructor(private http: HttpClient, configService: ConfigService) {
-    this.wsSubject = webSocket("ws://apps.pbn.bnl.gov/pushservice/ws");
+    this.wsSubject = webSocket("wss://apps.pbn.bnl.gov/pushservice/ws");
   }
 
   fetchServers(q?: string, category?: string) {

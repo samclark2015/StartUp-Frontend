@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  host: "http://acnlinka.pbn.bnl.gov:8002/",
-  // host: "https://startup.pbn.bnl.gov/backend/",
+  // host: "http://acnlinka.pbn.bnl.gov:8002/",
+  host: "https://startup.pbn.bnl.gov/backend/",
   useTokenAuth: true
 };
 
