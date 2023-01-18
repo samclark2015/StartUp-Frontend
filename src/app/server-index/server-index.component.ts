@@ -107,10 +107,18 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
             }];
             this.availableActions = this.selectedServers[0].actions;
             this.actionPending = server.current_job != null;
-            this.socket = merge(
-              this.api.subscribeWS(`StartUp.servers.${id}`),
-              this.api.subscribeWS(`SystemMonitor.${server.sysmon_status.Name}`),
-            ).subscribe(message => {
+
+            let mergedWs;
+            if(server.sysmon_status != null) {
+              mergedWs = merge(
+                this.api.subscribeWS(`StartUp.servers.${id}`),
+                this.api.subscribeWS(`SystemMonitor.${server.sysmon_status.Name}`),
+              );
+            } else {
+              mergedWs = this.api.subscribeWS(`StartUp.servers.${id}`);
+            }
+
+            this.socket = mergedWs.subscribe(message => {
               switch (message.type) {
                 case "job.complete":
                   this.actionPending = false;
