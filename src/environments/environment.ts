@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   // host: "http://acnlinka.pbn.bnl.gov:8002/",
-  host: "http://startup.pbn.bnl.gov:12345/",
+  apiBase: "http://startup.pbn.bnl.gov:12345/",
   useTokenAuth: true
 };
 

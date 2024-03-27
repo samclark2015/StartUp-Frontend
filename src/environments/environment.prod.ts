@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  host: "/backend/",
+  apiBase: "/backend/",
   useTokenAuth: false
 };

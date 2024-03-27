@@ -8,8 +8,8 @@ export class ConfigService {
 
   constructor() { }
 
-  get host() {
-    return environment.host;
+  get apiBase() {
+    return new URL(environment.apiBase, location.href);
   }
 
   get useTokenAuth() {

@@ -23,7 +23,7 @@ export class AppComponent implements OnInit {
   }
 
   get host() {
-    let url = new URL(this.configService.host);
+    let url = new URL(this.configService.apiBase);
     return url.host;
   }
 
@@ -31,7 +31,7 @@ export class AppComponent implements OnInit {
     if (environment.useTokenAuth) {
       this.router.navigate(["login", { next: location.pathname }]);
     } else {
-      let url = new URL("login/", this.configService.host);
+      let url = new URL("login/", this.configService.apiBase);
       url.searchParams.set("next", location.href);
       location.href = url.toString();
     }
@@ -41,7 +41,7 @@ export class AppComponent implements OnInit {
     if (environment.useTokenAuth) {
       this.auth.doTokenLogout();
     } else {
-      let url = new URL("logout/", this.configService.host)
+      let url = new URL("logout/", this.configService.apiBase)
       url.searchParams.set("next", location.href);
       location.href = url.toString();
     }

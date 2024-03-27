@@ -7,7 +7,7 @@ import { environment } from 'src/environments/environment';
 export class BackendUrlPipe implements PipeTransform {
 
   transform(value: string): string {
-    let url = new URL(value, environment.host);
+    let url = new URL(value, environment.apiBase);
     return url.toString();
   }
 
