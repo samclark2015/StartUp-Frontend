@@ -23,7 +23,7 @@ export class AppComponent implements OnInit {
   }
 
   get host() {
-    let url = new URL(this.configService.apiBase);
+    let url = this.configService.apiBase;
     return url.host;
   }
 
