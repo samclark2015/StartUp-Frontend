@@ -24,7 +24,7 @@ export class ApiInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     if (request.url.indexOf('://') < 0 && request.url.indexOf('//') < 0) {
       // URL is relative; either "http://example.com" or "//example.com"
-      let baseUrl = new URL("/api", this.configService.apiBase);
+      let baseUrl = new URL("api/", this.configService.apiBase);
       let url = new URL(request.url, baseUrl).toString();
       request = request.clone({ url });
     }
