@@ -31,7 +31,7 @@
                         <ng-container *ngFor="let action of selectedServer?.actions">
                             <p class="control" *ngIf="action.primary">
                                 <button class="button" (click)="handleAction(action)"
-                                    [disabled]="actionPending || (!isAuthenticated && action.protected)">
+                                    [disabled]="actionPending">
                                     {{action.title}}
                                 </button>
                             </p>
@@ -52,7 +52,7 @@
                                         <ng-container *ngFor="let action of selectedServer?.actions">
                                             <a class="link dropdown-item" *ngIf="!action.primary"
                                                 (click)="state.isActive = false; handleAction(action)"
-                                                [class.disabled]="actionPending || (!isAuthenticated && action.protected)">
+                                                [class.disabled]="actionPending">
                                                 {{action.title}}
                                             </a>
                                         </ng-container>
@@ -201,7 +201,7 @@
                         <ng-container *ngFor="let action of availableActions">
                             <p class="control" *ngIf="action.primary">
                                 <button class="button" (click)="handleAction(action)"
-                                    [disabled]="actionPending || (!isAuthenticated && action.protected)">
+                                    [disabled]="actionPending">
                                     {{action.title}}
                                 </button>
                             </p>
@@ -222,7 +222,7 @@
                                         <ng-container *ngFor="let action of availableActions">
                                             <a class="link dropdown-item" *ngIf="!action.primary"
                                                 (click)="state.isActive = false; handleAction(action)"
-                                                [class.disabled]="actionPending || (!isAuthenticated && action.protected)">
+                                                [class.disabled]="actionPending">
                                                 {{action.title}}
                                             </a>
                                         </ng-container>

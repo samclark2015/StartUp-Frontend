@@ -14,6 +14,8 @@ import {
   transition,
 } from '@angular/animations';
 import _ from 'lodash';
+import { environment } from 'src/environments/environment';
+import { ConfigService } from '../config.service';
 
 @Component({
   selector: 'app-server-index',
@@ -60,7 +62,7 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
   private currentRequest?: Subscription;
   private fetchServerRequest?: Subscription;
 
-  constructor(private api: ApiService, private route: ActivatedRoute, private router: Router, private auth: AuthService) {
+  constructor(private api: ApiService, private route: ActivatedRoute, private router: Router, private auth: AuthService, private configService: ConfigService) {
     super();
   }
 
@@ -200,7 +202,21 @@ export class ServerIndexComponent extends SubscriptionDelegate implements OnInit
       : `Monitored by ${name}`
   }
 
+  login() {
+    if (environment.useTokenAuth) {
+      this.router.navigate(["login", { next: location.pathname }]);
+    } else {
+      let url = new URL("login/", this.configService.apiBase);
+      url.searchParams.set("next", location.href);
+      location.href = url.toString();
+    }
+  }
+
   async handleAction(action: any) {
+    if (!this.isAuthenticated && action.protected) {
+      this.login();
+    }
+
     if (this.selectedServer) {
       this.actionPending = true;
       try {
